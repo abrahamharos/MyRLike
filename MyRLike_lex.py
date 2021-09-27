@@ -16,9 +16,10 @@ tokens = [
     # Assignment (=)
     'EQUALS',
 
-    # Delimeters ( ) { } , ;
+    # Delimeters ( ) { } [ ] , ;
     'LPAREN', 'RPAREN',
     'LBRACE', 'RBRACE',
+    'LBRACKET', 'RBRACKET',
     'COMMA', 'SEMI',
 
     # Conditional statements (if, else)
@@ -76,6 +77,8 @@ t_LPAREN           = r'\('
 t_RPAREN           = r'\)'
 t_LBRACE           = r'\{'
 t_RBRACE           = r'\}'
+t_LBRACKET         = r'\['
+t_RBRACKET         = r'\]'
 t_COMMA            = r','
 t_SEMI             = r';'
 

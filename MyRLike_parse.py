@@ -173,7 +173,7 @@ def p_return(p):
     pass
 
 def p_error(t):
-    print("ERROR")
+    print("Syntax error at '%s'" % t.value)
     exit()
 
 

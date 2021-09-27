@@ -1,0 +1,19 @@
+Program MyRlike;
+
+VARS
+    int i, j, p, arreglo[10];
+    float valor;
+
+func int fact (int j)
+{
+    j = i + 1;
+    return (j);
+}
+
+main(){
+    while (x < 11) do 
+    {
+        x = x + 1;
+    }
+    write("Como le fue");
+}

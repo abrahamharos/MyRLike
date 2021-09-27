@@ -31,8 +31,8 @@ tokens = [
     # Operations (read, write)
     'READ', 'WRITE',
 
-    # Declaration (Program, VARS, int, float, main, func, void)
-    'PROGRAM', 'VARS', 'TYPEINT', 'TYPEFLOAT', 'TYPECHAR', 'MAIN', 'FUNC', 'VOID',
+    # Declaration (Program, VARS, int, float, main, func, void, return)
+    'PROGRAM', 'VARS', 'TYPEINT', 'TYPEFLOAT', 'TYPECHAR', 'MAIN', 'FUNC', 'VOID', 'RETURN',
 ]
 
 reserverd = {
@@ -52,6 +52,7 @@ reserverd = {
     'main':     'MAIN',
     'func':     'FUNC',
     'void':     'VOID',
+    'return':   'RETURN',
 }
 
 # Completely ignored characters (whitespace, tab and new line)

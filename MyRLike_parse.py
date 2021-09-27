@@ -9,7 +9,7 @@ preclist = []
 def p_program(p):
     '''program      : PROGRAM ID SEMI body
                     | PROGRAM ID SEMI vars_dec body
-                    | PROGRAM ID SEMI vars_dec function_dec body'''
+                    | PROGRAM ID SEMI vars_dec func_dec body'''
     pass
 
 def p_body(p):
@@ -73,7 +73,7 @@ def p_m_exp(p):
 def p_t(p):
     '''t            : f
                     | f TIMES f
-                    | f divide f'''
+                    | f DIVIDE f'''
     pass
 
 def p_f(p):
@@ -166,6 +166,10 @@ def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
                     |   FUNC func_type ID LPAREN RPAREN block
                     |   FUNC func_type ID LPAREN func_params RPAREN block'''
+    pass
+
+def p_return(p):
+    '''return       :   RETURN LPAREN exp RPAREN'''
     pass
 
 def p_error(t):

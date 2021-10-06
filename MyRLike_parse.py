@@ -3,14 +3,11 @@ import MyRLike_lex
 tokens = MyRLike_lex.tokens
 from ply import yacc
 
-tokenlist = []
-preclist = []
-
 def p_program(p):
     '''program      : PROGRAM ID SEMI body
                     | PROGRAM ID SEMI vars_dec body
                     | PROGRAM ID SEMI vars_dec func_dec body'''
-    pass
+    print(list(p))
 
 def p_body(p):
     '''body         : MAIN LPAREN RPAREN block'''
@@ -164,8 +161,8 @@ def p_func_type(p):
 
 def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
-                    |   FUNC func_type ID LPAREN RPAREN block
-                    |   FUNC func_type ID LPAREN func_params RPAREN block'''
+                    |   FUNC func_type ID LPAREN RPAREN vars_dec block
+                    |   FUNC func_type ID LPAREN func_params RPAREN vars_dec block'''
     pass
 
 def p_return(p):
@@ -182,6 +179,10 @@ def p_error(t):
 # python3 MyRLike_parse.py testValid.txt
 def main():
     parser = yacc.yacc()
+
+    if(len(sys.argv) < 2):
+        print("Please provide a valid filename as parameter\n Example: tests/valid1.txt")
+        exit()
 
     validProgram = open(sys.argv[1]).read()
 

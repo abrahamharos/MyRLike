@@ -10,8 +10,8 @@ tokens = [
     # Literals (id, cteI, cteF, cteS)
     'ID', 'INT', 'FLOAT', 'STRING', 'CHAR',
 
-    # Operators (+, -, *, /, <, >, ==, !=, ||, &)
-    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LT', 'GT', 'EQ', 'NE', 'OR', 'AND',
+    # Operators (+, -, *, /, <, >, ==, !=, ||, &, >=, <=)
+    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LT', 'GT', 'EQ', 'NE', 'OR', 'AND', 'GTE', 'LTE',
 
     # Assignment (=)
     'EQUALS',
@@ -69,6 +69,8 @@ t_EQ               = r'=='
 t_NE               = r'!='
 t_OR               = r'\|\|'
 t_AND              = r'&'
+t_GTE              = r'>='
+t_LTE              = r'<='
 
 # Assignment operators
 t_EQUALS           = r'='

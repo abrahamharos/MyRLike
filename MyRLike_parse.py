@@ -5,6 +5,7 @@ from ply import yacc
 import pprint
 
 # TODO: Move this declaration/functions to a separate file.
+# TODO: Delete VAR tables once parser finish
 functionDirectory = {}
 currentType = ''
 currentVariableName = ''
@@ -16,10 +17,10 @@ def p_program(p):
                     | PROGRAM ID save_program_data SEMI vars_dec body
                     | PROGRAM ID save_program_data SEMI vars_dec func_dec body'''
     
-    # global functionDirectory
+    global functionDirectory
     
-    # print('\n')
-    # pprint.pprint(functionDirectory)
+    print('\n')
+    pprint.pprint(functionDirectory)
 
 def p_save_program_data(p):
     '''save_program_data : '''
@@ -256,17 +257,19 @@ def p_error(t):
 # To call the parser run MyRLike_parse.py with the name of the txt file
 # Example:
 # python3 MyRLike_parse.py testValid.txt
-def main():
+def main(fileName):
+    fileName = open(fileName).read()
+
     parser = yacc.yacc()
 
+    yacc.parse(fileName)
+    result = "Valid tokens and sintax"
+    print(result)
+    return result
+
+if __name__ == '__main__':
     if(len(sys.argv) < 2):
         print("Please provide a valid filename as parameter\n Example: tests/valid1.txt")
         exit()
 
-    validProgram = open(sys.argv[1]).read()
-
-    yacc.parse(validProgram)
-    print("Valid tokens and sintax")
-
-if __name__ == '__main__':
-    main()
+    main(sys.argv[1])

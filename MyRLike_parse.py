@@ -251,7 +251,7 @@ def p_return(p):
 
 def p_error(t):
     print("Syntax error at '%s'" % t.value)
-    exit()
+    sys.exit(1)
 
 
 # To call the parser run MyRLike_parse.py with the name of the txt file

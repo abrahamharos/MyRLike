@@ -5,6 +5,7 @@ VARS
     float valor;
 
 func int fact (int j)
+VARS int x;
 {
     j = i + 1;
     return (j);

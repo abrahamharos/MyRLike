@@ -58,7 +58,9 @@ def p_g_exp(p):
                     | m_exp LT m_exp
                     | m_exp GT m_exp
                     | m_exp EQ m_exp
-                    | m_exp NE m_exp'''
+                    | m_exp NE m_exp
+                    | m_exp GTE m_exp
+                    | m_exp LTE m_exp'''
     pass
 
 def p_m_exp(p):
@@ -162,7 +164,9 @@ def p_func_type(p):
 def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
                     |   FUNC func_type ID LPAREN RPAREN vars_dec block
-                    |   FUNC func_type ID LPAREN func_params RPAREN vars_dec block'''
+                    |   FUNC func_type ID LPAREN func_params RPAREN vars_dec block
+                    |   FUNC func_type ID LPAREN RPAREN block
+                    |   FUNC func_type ID LPAREN func_params RPAREN block'''
     pass
 
 def p_return(p):

@@ -15,6 +15,11 @@ def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI body
                     | PROGRAM ID save_program_data SEMI vars_dec body
                     | PROGRAM ID save_program_data SEMI vars_dec func_dec body'''
+    
+    # global functionDirectory
+    
+    # print('\n')
+    # pprint.pprint(functionDirectory)
 
 def p_save_program_data(p):
     '''save_program_data : '''

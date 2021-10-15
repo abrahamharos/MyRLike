@@ -12,6 +12,13 @@ currentVariableName = ''
 currentFunction = ''
 programName = ''
 
+# Cuadruplos
+operandStack = []
+typeStack = []
+operatorStack = []
+cuadruplos = []
+tmpCounter = 0
+
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI body
                     | PROGRAM ID save_program_data SEMI vars_dec body
@@ -20,7 +27,7 @@ def p_program(p):
     global functionDirectory
     
     print('\n')
-    pprint.pprint(functionDirectory)
+    #pprint.pprint(functionDirectory)
 
 def p_save_program_data(p):
     '''save_program_data : '''
@@ -64,8 +71,15 @@ def p_md_variable(p):
                     | LBRACKET INT RBRACKET'''
     pass
 
+def p_quad_save_vars(p):
+    '''quad_save_vars : '''
+    global functionDirectory, currentFunction
+    # print(p[-1])
+    print(functionDirectory[currentFunction]['vars'])
+
+# TODO: Save arrays in VARS directory
 def p_variable(p):
-    '''variable     : ID
+    '''variable     : ID quad_save_vars
                     | ID md_variable'''
     pass
 
@@ -204,8 +218,7 @@ def p_save_VARTable(p):
 
 def p_func_params(p):
     '''func_params  :   func_params COMMA func_params
-                    |   type ID'''
-    pass
+                    |   save_VARTable type ID save_variable_name'''
 
 def p_func_type(p):
     '''func_type    :   type
@@ -269,7 +282,7 @@ def main(fileName):
 
 if __name__ == '__main__':
     if(len(sys.argv) < 2):
-        print("Please provide a valid filename as parameter\n Example: tests/valid1.txt")
+        print("Please provide a valid filename as parameter\n Example: tests/parser/valid1.txt")
         exit()
 
     main(sys.argv[1])

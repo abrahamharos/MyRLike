@@ -42,8 +42,14 @@ def p_save_program_data(p):
         'type': currentType
     }
 
+def p_set_main_current_function(p):
+    '''set_main_current_function :   '''
+
+    global currentFunction
+    currentFunction = programName
+
 def p_body(p):
-    '''body         : MAIN LPAREN RPAREN block'''
+    '''body         : MAIN set_main_current_function LPAREN RPAREN block'''
     pass
 
 def p_block(p):
@@ -240,9 +246,10 @@ def p_func_dec(p):
 def p_save_function_data(p):
     '''save_function_data : '''
 
-    global functionDirectory
+    global functionDirectory, programName
 
     localFunctionName = p[-1]
+
     # Check if functionDirectory already has a function with the same name
     # If not, initialize one.
     if localFunctionName in functionDirectory.keys():
@@ -252,7 +259,7 @@ def p_save_function_data(p):
 
     global currentType, currentFunction
     
-    currentFunction = p[-1]
+    currentFunction = localFunctionName
 
     functionDirectory[currentFunction] = {
         'type': currentType

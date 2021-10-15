@@ -80,8 +80,9 @@ def p_md_variable(p):
 def p_quad_save_vars(p):
     '''quad_save_vars : '''
     global functionDirectory, currentFunction
-    # print(p[-1])
-    print(functionDirectory[currentFunction]['vars'])
+    
+    currentVariable = p[-1]
+    print(functionDirectory[currentFunction]['vars'][currentVariable])
 
 # TODO: Save arrays in VARS directory
 def p_variable(p):

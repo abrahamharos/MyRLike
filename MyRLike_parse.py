@@ -102,45 +102,72 @@ def p_variable(p):
                     | ID md_variable'''
     pass
 
+# TODO
+def p_quad_save_or(p):
+    '''quad_save_or : '''
+    global operandStack, operatorStack, typeStack
+
+    currentOperator = p[-1]
+    operatorStack.append(currentOperator)
+
 def p_exp(p):
-    '''exp          : t_exp OR exp
+    '''exp          : t_exp OR quad_save_or exp
                     | t_exp'''
     pass
 
+# TODO
+def p_quad_save_and(p):
+    '''quad_save_and : '''
+    global operandStack, operatorStack, typeStack
+
+    currentOperator = p[-1]
+    operatorStack.append(currentOperator)
+
 def p_t_exp(p):
-    '''t_exp        : g_exp AND t_exp
+    '''t_exp        : g_exp AND quad_save_and t_exp
                     | g_exp'''
-    pass
+
+# TODO
+def p_quad_save_comparators(p):
+    '''quad_save_comparators : '''
+    global operandStack, operatorStack, typeStack
+
+    currentOperator = p[-1]
+    operatorStack.append(currentOperator)
 
 def p_g_exp(p):
     '''g_exp        : m_exp
-                    | m_exp LT g_exp
-                    | m_exp GT g_exp
-                    | m_exp EQ g_exp
-                    | m_exp NE g_exp
-                    | m_exp GTE g_exp
-                    | m_exp LTE g_exp'''
-    pass
+                    | m_exp LT quad_save_comparators g_exp
+                    | m_exp GT quad_save_comparators g_exp
+                    | m_exp EQ quad_save_comparators g_exp
+                    | m_exp NE quad_save_comparators g_exp
+                    | m_exp GTE quad_save_comparators g_exp
+                    | m_exp LTE quad_save_comparators g_exp'''
+# TODO
+def p_quad_save_plus_minus(p):
+    '''quad_save_plus_minus : '''
+    global operandStack, operatorStack, typeStack
+
+    currentOperator = p[-1]
+    operatorStack.append(currentOperator)
 
 def p_m_exp(p):
     '''m_exp        : t
-                    | t PLUS m_exp
-                    | t MINUS m_exp'''
-    pass
+                    | t PLUS quad_save_plus_minus m_exp
+                    | t MINUS quad_save_plus_minus m_exp'''
 
+# TODO
 def p_quad_save_times_divide(p):
     '''quad_save_times_divide : '''
     global operandStack, operatorStack, typeStack
 
     currentOperator = p[-1]
     operatorStack.append(currentOperator)
-    print(operatorStack)
 
 def p_t(p):
     '''t            : f
                     | f TIMES quad_save_times_divide t
                     | f DIVIDE quad_save_times_divide t'''
-    pass
 
 def p_quad_save_int(p):
     '''quad_save_int :  '''

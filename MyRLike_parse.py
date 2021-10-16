@@ -3,7 +3,7 @@ import MyRLike_lex
 tokens = MyRLike_lex.tokens
 from ply import yacc
 import pprint
-from cuboSemantico import CS
+from cuboSemantico import CS, checkValidOperators
 
 # TODO: Move this declaration/functions to a separate file.
 # TODO: Delete VAR tables once parser finish
@@ -17,7 +17,8 @@ programName = ''
 operandStack = []
 typeStack = []
 operatorStack = []
-cuadruplos = []
+quadruples = []
+temporals = []
 tmpCounter = 0
 
 def p_program(p):
@@ -69,9 +70,31 @@ def p_statement(p):
                     | for_loop'''
     pass
 
+def p_quad_generate_assignment(p):
+    '''quad_generate_assignment : '''
+    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples
+    
+    if (len(operatorStack) > 0):
+        currentOperator = operatorStack[-1]
+        if (currentOperator == '='):
+            operatorStack.pop()
+            
+            rightOperand = operandStack.pop()
+            rightType = typeStack.pop()
+            leftOperand = operandStack.pop()
+            leftType = typeStack.pop()
+            
+            resultType = checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentOperator)
+
+            # TODO: replace t+str() for memory spaces
+            quadruple = (currentOperator, rightOperand, '', leftOperand)
+            
+            quadruples.append(quadruple)
+            operandStack.append(leftOperand)
+            typeStack.append(resultType)
+
 def p_assignment(p):
-    '''assignment   : variable EQUALS quad_save_operator exp'''
-    pass
+    '''assignment   : variable EQUALS quad_save_operator exp quad_generate_assignment'''
 
 def p_md_variable(p):
     '''md_variable  : LBRACKET INT RBRACKET md_variable
@@ -103,35 +126,55 @@ def p_variable(p):
                     | ID md_variable'''
     pass
 
-# TODO
-def p_quad_save_or(p):
-    '''quad_save_or : '''
-    global operandStack, operatorStack, typeStack
+def p_quad_generate(p):
+    '''quad_generate : '''
+    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples
+    print('\n\n**************************************************************')
+    print(operatorStack)
+    
+    validOperators = ['||', '&', '<', '<=', '>', '>=', '!=', '==', '+', '-', '*', '/']
+    if (len(operatorStack) > 0):
+        currentOperator = operatorStack[-1]
+        if (currentOperator in validOperators):
+            operatorStack.pop()
+            
+            rightOperand = operandStack.pop()
+            rightType = typeStack.pop()
+            leftOperand = operandStack.pop()
+            leftType = typeStack.pop()
+            
+            resultType = checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentOperator)
 
-    currentOperator = p[-1]
-    operatorStack.append(currentOperator)
+            # TODO: replace t+str() for memory spaces
+            result = 't' +  str(tmpCounter)
+            quadruple = (currentOperator, leftOperand, rightOperand, result)
+            tmpCounter = tmpCounter + 1
+            
+            quadruples.append(quadruple)
+            operandStack.append(result)
+            typeStack.append(resultType)
 
 def p_exp(p):
-    '''exp          : t_exp OR quad_save_operator exp
-                    | t_exp'''
+    '''exp          : t_exp quad_generate OR quad_save_operator exp
+                    | t_exp quad_generate'''
 
 def p_t_exp(p):
-    '''t_exp        : g_exp AND quad_save_operator t_exp
-                    | g_exp'''
+    '''t_exp        : g_exp quad_generate AND quad_save_operator t_exp
+                    | g_exp quad_generate '''
 
 def p_g_exp(p):
-    '''g_exp        : m_exp
-                    | m_exp LT quad_save_operator g_exp
-                    | m_exp GT quad_save_operator g_exp
-                    | m_exp EQ quad_save_operator g_exp
-                    | m_exp NE quad_save_operator g_exp
-                    | m_exp GTE quad_save_operator g_exp
-                    | m_exp LTE quad_save_operator g_exp'''
-
+    '''g_exp        : m_exp quad_generate
+                    | m_exp quad_generate LT quad_save_operator g_exp
+                    | m_exp quad_generate GT quad_save_operator g_exp
+                    | m_exp quad_generate EQ quad_save_operator g_exp
+                    | m_exp quad_generate NE quad_save_operator g_exp
+                    | m_exp quad_generate GTE quad_save_operator g_exp
+                    | m_exp quad_generate LTE quad_save_operator g_exp'''
+            
 def p_m_exp(p):
-    '''m_exp        : t
-                    | t PLUS quad_save_operator m_exp
-                    | t MINUS quad_save_operator m_exp'''
+    '''m_exp        : t quad_generate
+                    | t quad_generate PLUS quad_save_operator m_exp
+                    | t quad_generate MINUS quad_save_operator m_exp'''
 
 # TODO
 def p_quad_save_operator(p):
@@ -140,16 +183,11 @@ def p_quad_save_operator(p):
 
     currentOperator = p[-1]
     operatorStack.append(currentOperator)
-    print(operatorStack)
-
-def p_quad_generate_times_divide(p):
-    '''quad_generate_times_divide : '''
-    print('a ver al cine')
 
 def p_t(p):
-    '''t            : f quad_generate_times_divide
-                    | f quad_generate_times_divide TIMES quad_save_operator t
-                    | f quad_generate_times_divide DIVIDE quad_save_operator t'''
+    '''t            : f
+                    | f quad_generate TIMES quad_save_operator t
+                    | f quad_generate DIVIDE quad_save_operator t'''
 
 def p_quad_save_int(p):
     '''quad_save_int :  '''
@@ -178,8 +216,16 @@ def p_quad_save_char(p):
     operandStack.append(currentValue)
     typeStack.append('char')
 
+def p_quad_close_parenthesis(p):
+    '''quad_close_parenthesis : '''
+    global operatorStack
+    
+    currentOperator = operatorStack[-1]
+    if (currentOperator == '('):
+        operatorStack.pop()
+
 def p_f(p):
-    '''f            : LPAREN quad_save_operator exp RPAREN quad_save_operator
+    '''f            : LPAREN quad_save_operator exp RPAREN quad_close_parenthesis
                     | variable
                     | call
                     | INT quad_save_int
@@ -341,6 +387,9 @@ def main(fileName):
 
     yacc.parse(fileName)
     result = "Valid tokens and sintax"
+    for quad in quadruples:
+        print(quad)
+
     print(result)
     return result
 

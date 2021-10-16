@@ -3,6 +3,7 @@ import MyRLike_lex
 tokens = MyRLike_lex.tokens
 from ply import yacc
 import pprint
+from cuboSemantico import CS
 
 # TODO: Move this declaration/functions to a separate file.
 # TODO: Delete VAR tables once parser finish
@@ -111,63 +112,40 @@ def p_quad_save_or(p):
     operatorStack.append(currentOperator)
 
 def p_exp(p):
-    '''exp          : t_exp OR quad_save_or exp
+    '''exp          : t_exp OR quad_save_operator exp
                     | t_exp'''
-    pass
-
-# TODO
-def p_quad_save_and(p):
-    '''quad_save_and : '''
-    global operandStack, operatorStack, typeStack
-
-    currentOperator = p[-1]
-    operatorStack.append(currentOperator)
 
 def p_t_exp(p):
-    '''t_exp        : g_exp AND quad_save_and t_exp
+    '''t_exp        : g_exp AND quad_save_operator t_exp
                     | g_exp'''
-
-# TODO
-def p_quad_save_comparators(p):
-    '''quad_save_comparators : '''
-    global operandStack, operatorStack, typeStack
-
-    currentOperator = p[-1]
-    operatorStack.append(currentOperator)
 
 def p_g_exp(p):
     '''g_exp        : m_exp
-                    | m_exp LT quad_save_comparators g_exp
-                    | m_exp GT quad_save_comparators g_exp
-                    | m_exp EQ quad_save_comparators g_exp
-                    | m_exp NE quad_save_comparators g_exp
-                    | m_exp GTE quad_save_comparators g_exp
-                    | m_exp LTE quad_save_comparators g_exp'''
-# TODO
-def p_quad_save_plus_minus(p):
-    '''quad_save_plus_minus : '''
-    global operandStack, operatorStack, typeStack
-
-    currentOperator = p[-1]
-    operatorStack.append(currentOperator)
+                    | m_exp LT quad_save_operator g_exp
+                    | m_exp GT quad_save_operator g_exp
+                    | m_exp EQ quad_save_operator g_exp
+                    | m_exp NE quad_save_operator g_exp
+                    | m_exp GTE quad_save_operator g_exp
+                    | m_exp LTE quad_save_operator g_exp'''
 
 def p_m_exp(p):
     '''m_exp        : t
-                    | t PLUS quad_save_plus_minus m_exp
-                    | t MINUS quad_save_plus_minus m_exp'''
+                    | t PLUS quad_save_operator m_exp
+                    | t MINUS quad_save_operator m_exp'''
 
 # TODO
-def p_quad_save_times_divide(p):
-    '''quad_save_times_divide : '''
+def p_quad_save_operator(p):
+    '''quad_save_operator : '''
     global operandStack, operatorStack, typeStack
 
     currentOperator = p[-1]
     operatorStack.append(currentOperator)
+    print(operatorStack)
 
 def p_t(p):
     '''t            : f
-                    | f TIMES quad_save_times_divide t
-                    | f DIVIDE quad_save_times_divide t'''
+                    | f TIMES quad_save_operator t
+                    | f DIVIDE quad_save_operator t'''
 
 def p_quad_save_int(p):
     '''quad_save_int :  '''

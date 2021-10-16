@@ -95,8 +95,6 @@ def p_quad_save_vars(p):
     else:
         operandStack.append(currentVariable)
         typeStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['type'])
-    
-    #print(functionDirectory[currentFunction]['vars'][currentVariable])
 
 # TODO: Save arrays in VARS directory
 def p_variable(p):
@@ -130,10 +128,18 @@ def p_m_exp(p):
                     | t MINUS t'''
     pass
 
+def p_quad_save_times_divide(p):
+    '''quad_save_times_divide : '''
+    global operandStack, operatorStack, typeStack
+
+    currentOperator = p[-1]
+    operatorStack.append(currentOperator)
+    print(operatorStack)
+
 def p_t(p):
     '''t            : f
-                    | f TIMES f
-                    | f DIVIDE f'''
+                    | f TIMES quad_save_times_divide f
+                    | f DIVIDE quad_save_times_divide f'''
     pass
 
 def p_quad_save_int(p):

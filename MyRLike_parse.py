@@ -114,18 +114,18 @@ def p_t_exp(p):
 
 def p_g_exp(p):
     '''g_exp        : m_exp
-                    | m_exp LT m_exp
-                    | m_exp GT m_exp
-                    | m_exp EQ m_exp
-                    | m_exp NE m_exp
-                    | m_exp GTE m_exp
-                    | m_exp LTE m_exp'''
+                    | m_exp LT g_exp
+                    | m_exp GT g_exp
+                    | m_exp EQ g_exp
+                    | m_exp NE g_exp
+                    | m_exp GTE g_exp
+                    | m_exp LTE g_exp'''
     pass
 
 def p_m_exp(p):
     '''m_exp        : t
-                    | t PLUS t
-                    | t MINUS t'''
+                    | t PLUS m_exp
+                    | t MINUS m_exp'''
     pass
 
 def p_quad_save_times_divide(p):
@@ -138,8 +138,8 @@ def p_quad_save_times_divide(p):
 
 def p_t(p):
     '''t            : f
-                    | f TIMES quad_save_times_divide f
-                    | f DIVIDE quad_save_times_divide f'''
+                    | f TIMES quad_save_times_divide t
+                    | f DIVIDE quad_save_times_divide t'''
     pass
 
 def p_quad_save_int(p):

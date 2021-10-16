@@ -79,10 +79,24 @@ def p_md_variable(p):
 
 def p_quad_save_vars(p):
     '''quad_save_vars : '''
-    global functionDirectory, currentFunction
+    global functionDirectory, currentFunction, programName, operandStack, operatorStack, typeStack
     
     currentVariable = p[-1]
-    print(functionDirectory[currentFunction]['vars'][currentVariable])
+
+    # Check if currentVariable exist in the currentFunction Scope
+    # If not, check for the global one.
+    if not(currentVariable in functionDirectory[currentFunction]['vars'].keys()):
+        if (currentVariable in functionDirectory[programName]['vars'].keys()):
+            operandStack.append(currentVariable)
+            typeStack.append(functionDirectory[programName]['vars'][currentVariable]['type'])
+        else:
+            print("Variable \'" + currentVariable + "\' does not exist")
+            exit()
+    else:
+        operandStack.append(currentVariable)
+        typeStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['type'])
+    
+    #print(functionDirectory[currentFunction]['vars'][currentVariable])
 
 # TODO: Save arrays in VARS directory
 def p_variable(p):
@@ -122,13 +136,40 @@ def p_t(p):
                     | f DIVIDE f'''
     pass
 
+def p_quad_save_int(p):
+    '''quad_save_int :  '''
+    global operandStack, typeStack
+    
+    currentValue = p[-1]
+
+    operandStack.append(currentValue)
+    typeStack.append('int')
+
+def p_quad_save_float(p):
+    '''quad_save_float : '''
+    global operandStack, typeStack
+    
+    currentValue = p[-1]
+
+    operandStack.append(currentValue)
+    typeStack.append('float')
+
+def p_quad_save_char(p):
+    '''quad_save_char : '''
+    global operandStack, typeStack
+    
+    currentValue = p[-1]
+
+    operandStack.append(currentValue)
+    typeStack.append('char')
+
 def p_f(p):
     '''f            : LPAREN exp RPAREN
                     | variable
                     | call
-                    | INT
-                    | FLOAT
-                    | CHAR'''
+                    | INT quad_save_int
+                    | FLOAT quad_save_float
+                    | CHAR quad_save_char'''
     pass
 
 def p_call_param(p):

@@ -7,14 +7,14 @@ VARS
 func int fact (int j)
 VARS int x;
 {
-    j = i + 1;
+    j = i + 1.1;
     return (j);
 }
 
 main(){
-    while (x < 11) do 
+    while (p < 11) do 
     {
-        x = x + 1;
+        p = p + 1;
     }
     write("Como le fue");
 }

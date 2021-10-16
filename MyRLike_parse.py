@@ -142,10 +142,14 @@ def p_quad_save_operator(p):
     operatorStack.append(currentOperator)
     print(operatorStack)
 
+def p_quad_generate_times_divide(p):
+    '''quad_generate_times_divide : '''
+    print('a ver al cine')
+
 def p_t(p):
-    '''t            : f
-                    | f TIMES quad_save_operator t
-                    | f DIVIDE quad_save_operator t'''
+    '''t            : f quad_generate_times_divide
+                    | f quad_generate_times_divide TIMES quad_save_operator t
+                    | f quad_generate_times_divide DIVIDE quad_save_operator t'''
 
 def p_quad_save_int(p):
     '''quad_save_int :  '''

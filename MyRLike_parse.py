@@ -70,7 +70,7 @@ def p_statement(p):
     pass
 
 def p_assignment(p):
-    '''assignment   : variable EQUALS exp'''
+    '''assignment   : variable EQUALS quad_save_operator exp'''
     pass
 
 def p_md_variable(p):
@@ -175,7 +175,7 @@ def p_quad_save_char(p):
     typeStack.append('char')
 
 def p_f(p):
-    '''f            : LPAREN exp RPAREN
+    '''f            : LPAREN quad_save_operator exp RPAREN quad_save_operator
                     | variable
                     | call
                     | INT quad_save_int

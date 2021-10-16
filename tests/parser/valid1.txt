@@ -9,6 +9,7 @@ VARS int x;
 {
     j = i + 1.1;
     j = i / 1.1 * 2;
+    j = 2.2 * (j + i) / 3;
     return (j);
 }
 

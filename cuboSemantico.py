@@ -4,120 +4,147 @@
 CS = {
     'int': {
         'int': {
-            'PLUS': 'int',
-            'MINUS': 'int',
-            'TIMES': 'int',
-            'DIVIDE': 'float',
-            'LT': 'int',
-            'LTE': 'int',
-            'GT': 'int',
-            'GTE': 'int',
-            'EQ': 'int',
-            'NE': 'int',
-            'OR': 'int',
-            'AND': 'int'
+            '=': 'int',
+            '+': 'int',
+            '-': 'int',
+            '*': 'int',
+            '/': 'float',
+            '<': 'int',
+            '<=': 'int',
+            '>': 'int',
+            '>=': 'int',
+            '==': 'int',
+            '!=': 'int',
+            '||': 'int',
+            '&': 'int'
         },
         'float': {
-            'PLUS': 'float',
-            'MINUS': 'float',
-            'TIMES': 'float',
-            'DIVIDE': 'float',
-            'LT': 'int',
-            'LTE': 'int',
-            'GT': 'int',
-            'GTE': 'int',
-            'EQ': 'int',
-            'NE': 'int',
-            'OR': 'int',
-            'AND': 'int'
+            '+': 'float',
+            '-': 'float',
+            '*': 'float',
+            '/': 'float',
+            '<': 'int',
+            '<=': 'int',
+            '>': 'int',
+            '>=': 'int',
+            '==': 'int',
+            '!=': 'int',
+            '||': 'int',
+            '&': 'int'
         },
         'char': {
-            'PLUS': 'int',
-            'MINUS': 'int',
-            'TIMES': 'int',
-            'DIVIDE': 'float',
-            'LT': 'int',
-            'LTE': 'int',
-            'GT': 'int',
-            'GTE': 'int',
-            'EQ': 'int',
-            'NE': 'int',
-            'OR': 'int',
-            'AND': 'int'
+            '=': 'int',
+            '+': 'int',
+            '-': 'int',
+            '*': 'int',
+            '/': 'float',
+            '<': 'int',
+            '<=': 'int',
+            '>': 'int',
+            '>=': 'int',
+            '==': 'int',
+            '!=': 'int',
+            '||': 'int',
+            '&': 'int'
         }
     },
     'float': {
         'int': {
-            'PLUS': 'float',
-            'MINUS': 'float',
-            'TIMES': 'float',
-            'DIVIDE': 'float',
-            'LT': 'int',
-            'LTE': 'int',
-            'GT': 'int',
-            'GTE': 'int',
-            'EQ': 'int',
-            'NE': 'int',
-            'OR': 'int',
-            'AND': 'int'
+            '=': 'float',
+            '+': 'float',
+            '-': 'float',
+            '*': 'float',
+            '/': 'float',
+            '<': 'int',
+            '<=': 'int',
+            '>': 'int',
+            '>=': 'int',
+            '==': 'int',
+            '!=': 'int',
+            '||': 'int',
+            '&': 'int'
         },
         'float': {
-            'PLUS': 'float',
-            'MINUS': 'float',
-            'TIMES': 'float',
-            'DIVIDE': 'float',
-            'LT': 'int',
-            'LTE': 'int',
-            'GT': 'int',
-            'GTE': 'int',
-            'EQ': 'int',
-            'NE': 'int',
-            'OR': 'int',
-            'AND': 'int'
+            '=': 'float',
+            '+': 'float',
+            '-': 'float',
+            '*': 'float',
+            '/': 'float',
+            '<': 'int',
+            '<=': 'int',
+            '>': 'int',
+            '>=': 'int',
+            '==': 'int',
+            '!=': 'int',
+            '||': 'int',
+            '&': 'int'
         },
         'char': {
-            'PLUS': 'float',
-            'MINUS': 'float',
-            'TIMES': 'float',
-            'DIVIDE': 'float'
+            '=': 'float',
+            '+': 'float',
+            '-': 'float',
+            '*': 'float',
+            '/': 'float'
         }
     },
     'char': {
         'int': {
-            'PLUS': 'int',
-            'MINUS': 'int',
-            'TIMES': 'int',
-            'DIVIDE': 'float',
-            'LT': 'int',
-            'LTE': 'int',
-            'GT': 'int',
-            'GTE': 'int',
-            'EQ': 'int',
-            'NE': 'int',
-            'OR': 'int',
-            'AND': 'int'
+            '=': 'int',
+            '+': 'int',
+            '-': 'int',
+            '*': 'int',
+            '/': 'float',
+            '<': 'int',
+            '<=': 'int',
+            '>': 'int',
+            '>=': 'int',
+            '==': 'int',
+            '!=': 'int',
+            '||': 'int',
+            '&': 'int'
         },
         'float': {
-            'PLUS': 'float',
-            'MINUS': 'float',
-            'TIMES': 'float',
-            'DIVIDE': 'float'
+            '+': 'float',
+            '-': 'float',
+            '*': 'float',
+            '/': 'float'
         },
         'char': {
-            'PLUS': 'char',
-            'MINUS': 'char',
-            'TIMES': 'int',
-            'LT': 'int',
-            'LTE': 'int',
-            'GT': 'int',
-            'GTE': 'int',
-            'EQ': 'int',
-            'NE': 'int',
-            'OR': 'int',
-            'AND': 'int'
+            '=': 'char',
+            '+': 'char',
+            '-': 'char',
+            '*': 'int',
+            '<': 'int',
+            '<=': 'int',
+            '>': 'int',
+            '>=': 'int',
+            '==': 'int',
+            '!=': 'int',
+            '||': 'int',
+            '&': 'int'
         }
     }
 }
+
+def checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentOperator):
+    if (leftType in CS.keys()):
+        if (rightType in CS[leftType].keys()):
+            if (currentOperator in CS[leftType][rightType].keys()):
+                resultType = CS[leftType][rightType][currentOperator]
+            else:
+                print('Type mismatch ' + leftType + ' and ' + rightType + ' can not use the ' + currentOperator + ' operator')
+                print('Variables: ' + rightOperand + ' and ' + leftOperand)
+                exit()
+        else:
+            print('Type mismatch ' + leftType + ' and ' + rightType + ' can not use the ' + currentOperator + ' operator')
+            print('Variables: ' + rightOperand + ' and ' + leftOperand)
+            exit()
+    else:
+        print('Type mismatch ' + leftType + ' and ' + rightType + ' can not use the ' + currentOperator + ' operator')
+        print('Variables: ' + rightOperand + ' and ' + leftOperand)
+        exit()
+    
+    return resultType
 
 if __name__ == "__main__":
     print("Cubo semantico MYRLike:\n")

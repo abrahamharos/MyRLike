@@ -19,6 +19,11 @@ main(){
         p = 1;
         p = 1;
     }
+    write(p);
+    read(p);
+    write(p,i,j);
+    read(i);
+    write("Como le fue");
     if (p >= 1) {
         p = p + 1;
         p = p + 1;

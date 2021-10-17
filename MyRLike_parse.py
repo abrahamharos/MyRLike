@@ -1,4 +1,5 @@
 import sys
+import types
 import MyRLike_lex
 tokens = MyRLike_lex.tokens
 from ply import yacc
@@ -242,20 +243,46 @@ def p_call(p):
     '''call         : ID LPAREN call_param RPAREN'''
     pass
 
-def p_read_param(p):
-    '''read_param   : read_param COMMA read_param
-                    | variable'''
-    pass
+def p_quad_generate_read(p):
+    '''quad_generate_read : '''
+
+    global quadruples, quadCounter
+
+    readVariable = operandStack.pop()
+    readVariableType = typeStack.pop()
+    quadruple = ('READ', '', '', readVariable)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
 
 def p_read(p):
-    '''read         : READ LPAREN read_param RPAREN'''
+    '''read         : READ LPAREN variable quad_generate_read RPAREN'''
     pass
+
+def p_quad_insert_string(p):
+    '''quad_insert_string : '''
+    global typeStack, operandStack
+
+    typeStack.append('STRING')
+    operandStack.append(p[-1])
 
 def p_write_param(p):
     '''write_param  : write_param COMMA write_param
-                    | exp
-                    | STRING'''
+                    | exp quad_generate_write
+                    | STRING quad_insert_string quad_generate_write'''
     pass
+
+def p_quad_generate_write(p):
+    '''quad_generate_write : '''
+
+    global operandStack, typeStack, quadruples, quadCounter
+
+    currentOperand = operandStack.pop()
+    typeStack.pop()
+
+    quadruple = ('WRITE', '', '', currentOperand)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
 
 def p_write(p):
     '''write        : WRITE LPAREN write_param RPAREN'''

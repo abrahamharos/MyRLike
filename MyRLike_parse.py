@@ -20,6 +20,8 @@ operatorStack = []
 quadruples = []
 temporals = []
 tmpCounter = 0
+jumpStack = []
+quadCounter = 0
 
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI body
@@ -72,7 +74,7 @@ def p_statement(p):
 
 def p_quad_generate_assignment(p):
     '''quad_generate_assignment : '''
-    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples
+    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples, quadCounter
     
     if (len(operatorStack) > 0):
         currentOperator = operatorStack[-1]
@@ -88,10 +90,9 @@ def p_quad_generate_assignment(p):
 
             # TODO: replace t+str() for memory spaces
             quadruple = (currentOperator, rightOperand, '', leftOperand)
+            quadCounter = quadCounter + 1
             
             quadruples.append(quadruple)
-            operandStack.append(leftOperand)
-            typeStack.append(resultType)
 
 def p_assignment(p):
     '''assignment   : variable EQUALS quad_save_operator exp quad_generate_assignment'''
@@ -128,9 +129,7 @@ def p_variable(p):
 
 def p_quad_generate(p):
     '''quad_generate : '''
-    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples
-    print('\n\n**************************************************************')
-    print(operatorStack)
+    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples, quadCounter
     
     validOperators = ['||', '&', '<', '<=', '>', '>=', '!=', '==', '+', '-', '*', '/']
     if (len(operatorStack) > 0):
@@ -149,6 +148,7 @@ def p_quad_generate(p):
             result = 't' +  str(tmpCounter)
             quadruple = (currentOperator, leftOperand, rightOperand, result)
             tmpCounter = tmpCounter + 1
+            quadCounter = quadCounter + 1
             
             quadruples.append(quadruple)
             operandStack.append(result)
@@ -261,10 +261,60 @@ def p_write(p):
     '''write        : WRITE LPAREN write_param RPAREN'''
     pass
 
+def p_quad_generate_jump_gotof(p):
+    '''quad_generate_jump_gotof : '''
+
+    global jumpStack, operandStack, typeStack, operatorStack, quadCounter, quadruples
+
+    currentExpType = typeStack.pop()
+    if (currentExpType != 'int'):
+        print('Error: Type mismatch')
+        print('You can only evaluate integer values in an IF expression')
+        exit()
+    
+    result = operandStack.pop()
+
+    quadruple = ('gotof', result, '', '') # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    jumpStack.append(quadCounter - 1)
+
+
+def p_quad_generate_jump_fill(p):
+    '''quad_generate_jump_fill : '''
+
+    global jumpStack, quadCounter, quadruples
+
+    # Fill the pending quadruple
+    endOfTheJump = jumpStack.pop()
+    currentQuad = quadruples[endOfTheJump]
+    quadruple = (currentQuad[0], currentQuad[1], currentQuad[2], quadCounter)
+
+    quadruples[endOfTheJump] = quadruple
+
+def p_quad_generate_goto(p):
+    '''quad_generate_goto : '''
+    
+    global jumpStack, quadCounter, quadruples
+    
+    quadruple = ('goto', '', '', '') # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    jumpWhenFinishTrue = jumpStack.pop()
+    jumpStack.append(quadCounter - 1)
+
+    # Fill the pending quadruple
+    currentQuad = quadruples[jumpWhenFinishTrue]
+    quadruple = (currentQuad[0], currentQuad[1], currentQuad[2], quadCounter)
+
+    quadruples[jumpWhenFinishTrue] = quadruple
+
+
 def p_condition(p):
-    '''condition    : IF LPAREN exp RPAREN block
-                    | IF LPAREN exp RPAREN block ELSE block'''
-    pass
+    '''condition    : IF LPAREN exp RPAREN quad_generate_jump_gotof block quad_generate_jump_fill
+                    | IF LPAREN exp RPAREN quad_generate_jump_gotof block ELSE quad_generate_goto block quad_generate_jump_fill'''
 
 def p_while_loop(p):
     '''while_loop   : WHILE LPAREN exp RPAREN DO block'''
@@ -387,10 +437,14 @@ def main(fileName):
 
     yacc.parse(fileName)
     result = "Valid tokens and sintax"
-    for quad in quadruples:
-        print(quad)
-
     print(result)
+
+    print('******* Cuadruplos generados *******')
+    counter = 0
+    for quad in quadruples:
+        print(str(counter) + ' -\t' + str(quad))
+        counter = counter + 1
+    
     return result
 
 if __name__ == '__main__':

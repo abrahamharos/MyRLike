@@ -14,9 +14,21 @@ VARS int x;
 }
 
 main(){
-    while (i < 11) do 
-    {
-        p = p + 1;
+    if (p < 1) {
+        p = 1;
+        p = 1;
+        p = 1;
     }
+    if (p >= 1) {
+        p = p + 1;
+        p = p + 1;
+        p = p + 1;
+    } else {
+        p = 1;
+        p = 1;
+        p = 1;
+    }
+    p = 2 + 1;
+    p = i * j + p;
     write("Como le fue");
 }

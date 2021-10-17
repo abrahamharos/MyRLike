@@ -21,7 +21,12 @@ En esta ocasión no hay cambios visibles en la ejecución ya que todo se almacen
 
 Para probar el codigo es necesario proveer un archivo de texto como parámetro al momento de hacer la ejecución.
 
+## Avance 3
+Para este tercer avance se generaró el código de expresiones aritmeticas y estatutos secuenciales para asignación, operaciones, lecturas, comparaciones, operadores booleanos, entre otros.
+Tambien se generó el código para los estatutos condicionales lineales para decisiones (IF, IF/ELSE).
+Para lo mencionado anteriormente se generaron los cuadruplos correspondientes y al ejecutar el programa se imprimen en pantalla los cuadruplos generados.
+
 *Ejemplo*
 
-    python3 MyRLike_parse.py test/parser/testValid.txt
+    python3 MyRLike_parse.py tests/parser/testValid.txt
 Donde ***testValid.txt*** es la ruta del archivo a analizar.

@@ -36,4 +36,8 @@ main(){
     p = 2 + 1;
     p = i * j + p;
     write("Como le fue");
+
+    while(p < 2) do {
+        p = p - 1;
+    }
 }

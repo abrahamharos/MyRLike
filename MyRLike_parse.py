@@ -343,8 +343,34 @@ def p_condition(p):
     '''condition    : IF LPAREN exp RPAREN quad_generate_jump_gotof block quad_generate_jump_fill
                     | IF LPAREN exp RPAREN quad_generate_jump_gotof block ELSE quad_generate_goto block quad_generate_jump_fill'''
 
+def p_quad_generate_save_jump(p):
+    '''quad_generate_save_jump  : '''
+
+    global jumpStack,quadCounter
+    jumpStack.append(quadCounter)
+
+def p_quad_generate_goto_return(p):
+    '''quad_generate_goto_return : '''
+
+    global jumpStack, quadCounter, quadruples
+    
+    # Fill the pending quadruples
+    endOfTheJump = jumpStack.pop()
+    returnJump = jumpStack.pop()
+
+    # Generate quad goto return
+    quadruple = ('goto', '', '', returnJump) # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    # Fill the pending quadruple
+    currentQuad = quadruples[endOfTheJump]
+    quadruple = (currentQuad[0], currentQuad[1], currentQuad[2], quadCounter)
+
+    quadruples[endOfTheJump] = quadruple
+    
 def p_while_loop(p):
-    '''while_loop   : WHILE LPAREN exp RPAREN DO block'''
+    '''while_loop   : WHILE quad_generate_save_jump LPAREN exp RPAREN quad_generate_jump_gotof DO block quad_generate_goto_return'''
     pass
 
 def p_for_loop(p):

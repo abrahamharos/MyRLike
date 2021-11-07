@@ -40,4 +40,10 @@ main(){
     while(p < 2) do {
         p = p - 1;
     }
+
+    for i = 1 to 10 do {
+        for j = 1 to 11 do {
+            write(i + j);
+        }
+    }
 }

@@ -23,6 +23,7 @@ temporals = []
 tmpCounter = 0
 jumpStack = []
 quadCounter = 0
+forControlStack = []
 
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI body
@@ -373,8 +374,114 @@ def p_while_loop(p):
     '''while_loop   : WHILE quad_generate_save_jump LPAREN exp RPAREN quad_generate_jump_gotof DO block quad_generate_goto_return'''
     pass
 
+def p_quad_generate_is_int(p):
+    '''quad_generate_is_int   :   '''
+
+    global operandStack, typeStack
+
+    currentExpType = typeStack[-1]
+    if (currentExpType != 'int'):
+        print('Error: Type mismatch')
+        print('You can only use integer values for control variables in a FOR loop')
+        exit()
+
+def p_quad_generate_control_variable(p):
+    '''quad_generate_control_variable   :   '''
+
+    global operandStack, typeStack, operatorStack, quadCounter, quadruples, forControlStack
+
+    currentExp = operandStack.pop()
+    currentExpType = typeStack.pop()
+    if (currentExpType != 'int'):
+        print('Error: Type mismatch')
+        print('You can only assign integer values for control variables in a FOR loop')
+        exit()
+
+    controlVariable = operandStack.pop()
+    controlVariableType = typeStack.pop()
+    currentOperator = '='
+    forControlStack.append(controlVariable)
+
+    checkValidOperators(currentExp, currentExpType, controlVariable, controlVariableType, currentOperator)
+    
+    # generate control varibale assignment quad
+    quadruple = ('=', currentExp, '', controlVariable) # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+def p_quad_generate_final_control_variable(p):
+    '''quad_generate_final_control_variable :   '''
+    global operandStack, typeStack, operatorStack, quadCounter, quadruples, forControlStack, tmpCounter
+
+    currentExp = operandStack[-1]
+    currentExpType = typeStack[-1]
+    if (currentExpType != 'int'):
+        print('Error: Type mismatch')
+        print('You can only assign integer values for stop conditions in a FOR loop')
+        exit()
+
+    # generate stop condition variable assignment quad
+    # TODO: replace this for virtual memory
+    quadruple = ('=', currentExp, '', 'StopCondition') # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    controlVariable = forControlStack[-1]
+    result = 't' +  str(tmpCounter)
+    tmpCounter = tmpCounter + 1
+
+    # generate stop condition variable assignment quad
+    quadruple = ('<', controlVariable, 'StopCondition', result)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    jumpStack.append(quadCounter - 1)
+
+    # generate stop condition variable assignment quad
+    quadruple = ('gotof', result, '', '')
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    jumpStack.append(quadCounter - 1)
+
+def p_quad_generate_end_for_iteration(p):
+    '''quad_generate_end_for_iteration  :   '''
+
+    global operandStack, typeStack, operatorStack, quadCounter, quadruples, forControlStack, tmpCounter
+
+    controlVariable = forControlStack.pop()
+
+    result = 't' +  str(tmpCounter)
+    tmpCounter = tmpCounter + 1
+
+    quadruple = ('+', controlVariable, 1, result)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    quadruple = ('=', result, '', controlVariable)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    # Fill the pending quadruples
+    endOfTheJump = jumpStack.pop()
+    returnJump = jumpStack.pop()
+
+    # Generate quad goto return
+    quadruple = ('goto', '', '', returnJump) # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    # Fill the pending quadruple
+    currentQuad = quadruples[endOfTheJump]
+    quadruple = (currentQuad[0], currentQuad[1], currentQuad[2], quadCounter)
+
+    quadruples[endOfTheJump] = quadruple
+    
+    operandStack.pop()
+    typeStack.pop()
+
 def p_for_loop(p):
-    '''for_loop     : FOR variable EQUALS exp TO exp DO block'''
+    '''for_loop     : FOR variable quad_generate_is_int EQUALS exp quad_generate_control_variable TO exp quad_generate_final_control_variable DO block quad_generate_end_for_iteration'''
     pass
 
 def p_type(p):
@@ -491,6 +598,9 @@ def main(fileName):
     yacc.parse(fileName)
     result = "Valid tokens and sintax"
     print(result)
+
+    # print(operandStack)
+    # print(typeStack)
 
     print('******* Cuadruplos generados *******')
     counter = 0

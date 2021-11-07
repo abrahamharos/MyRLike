@@ -420,9 +420,12 @@ def p_quad_generate_final_control_variable(p):
         print('You can only assign integer values for stop conditions in a FOR loop')
         exit()
 
+    stopCondition = 't' +  str(tmpCounter)
+    tmpCounter = tmpCounter + 1
+
     # generate stop condition variable assignment quad
     # TODO: replace this for virtual memory
-    quadruple = ('=', currentExp, '', 'StopCondition') # Pending quadruple
+    quadruple = ('=', currentExp, '', stopCondition) # Pending quadruple
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
 
@@ -431,7 +434,7 @@ def p_quad_generate_final_control_variable(p):
     tmpCounter = tmpCounter + 1
 
     # generate stop condition variable assignment quad
-    quadruple = ('<', controlVariable, 'StopCondition', result)
+    quadruple = ('<', controlVariable, stopCondition, result)
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
 

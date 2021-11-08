@@ -7,6 +7,7 @@ VARS
 func int fact (int j)
 VARS int x;
 {
+    valor = i + 1;
     valor = i + 1.1;
     valor = i / 1.1 * 2;
     valor = 2.2 * (j + i) / 3;

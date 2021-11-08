@@ -5,6 +5,7 @@ tokens = MyRLike_lex.tokens
 from ply import yacc
 import pprint
 from cuboSemantico import CS, checkValidOperators
+from memoryDirection import newVirtualDirection, newTempVirtualDirection, newConstVirtualDirection
 
 # TODO: Move this declaration/functions to a separate file.
 # TODO: Delete VAR tables once parser finish
@@ -13,6 +14,12 @@ currentType = ''
 currentVariableName = ''
 currentFunction = ''
 programName = ''
+constantDirectory = {
+    'int': {},
+    'float': {},
+    'char': {},
+    'string': {}
+}
 
 # Cuadruplos
 operandStack = []
@@ -20,7 +27,6 @@ typeStack = []
 operatorStack = []
 quadruples = []
 temporals = []
-tmpCounter = 0
 jumpStack = []
 quadCounter = 0
 forControlStack = []
@@ -76,7 +82,7 @@ def p_statement(p):
 
 def p_quad_generate_assignment(p):
     '''quad_generate_assignment : '''
-    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples, quadCounter
+    global operatorStack, operandStack, typeStack, temporals, quadruples, quadCounter
     
     if (len(operatorStack) > 0):
         currentOperator = operatorStack[-1]
@@ -90,7 +96,6 @@ def p_quad_generate_assignment(p):
             
             resultType = checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentOperator)
 
-            # TODO: replace t+str() for memory spaces
             quadruple = (currentOperator, rightOperand, '', leftOperand)
             quadCounter = quadCounter + 1
             
@@ -114,13 +119,13 @@ def p_quad_save_vars(p):
     # If not, check for the global one.
     if not(currentVariable in functionDirectory[currentFunction]['vars'].keys()):
         if (currentVariable in functionDirectory[programName]['vars'].keys()):
-            operandStack.append(currentVariable)
+            operandStack.append(functionDirectory[programName]['vars'][currentVariable]['virDir'])
             typeStack.append(functionDirectory[programName]['vars'][currentVariable]['type'])
         else:
             print("Variable \'" + currentVariable + "\' does not exist")
             exit()
     else:
-        operandStack.append(currentVariable)
+        operandStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['virDir'])
         typeStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['type'])
 
 # TODO: Save arrays in VARS directory
@@ -131,7 +136,7 @@ def p_variable(p):
 
 def p_quad_generate(p):
     '''quad_generate : '''
-    global operatorStack, operandStack, typeStack, temporals, tmpCounter, quadruples, quadCounter
+    global operatorStack, operandStack, typeStack, temporals, quadruples, quadCounter
     
     validOperators = ['||', '&', '<', '<=', '>', '>=', '!=', '==', '+', '-', '*', '/']
     if (len(operatorStack) > 0):
@@ -146,10 +151,8 @@ def p_quad_generate(p):
             
             resultType = checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentOperator)
 
-            # TODO: replace t+str() for memory spaces
-            result = 't' +  str(tmpCounter)
+            result = newTempVirtualDirection(resultType)
             quadruple = (currentOperator, leftOperand, rightOperand, result)
-            tmpCounter = tmpCounter + 1
             quadCounter = quadCounter + 1
             
             quadruples.append(quadruple)
@@ -196,8 +199,10 @@ def p_quad_save_int(p):
     global operandStack, typeStack
     
     currentValue = p[-1]
+    if (currentValue not in constantDirectory['int'].keys()):
+        constantDirectory['int'][currentValue] = newConstVirtualDirection('int')
 
-    operandStack.append(currentValue)
+    operandStack.append(constantDirectory['int'][currentValue])
     typeStack.append('int')
 
 def p_quad_save_float(p):
@@ -205,8 +210,10 @@ def p_quad_save_float(p):
     global operandStack, typeStack
     
     currentValue = p[-1]
+    if (currentValue not in constantDirectory['float'].keys()):
+        constantDirectory['float'][currentValue] = newConstVirtualDirection('float')
 
-    operandStack.append(currentValue)
+    operandStack.append(constantDirectory['float'][currentValue])
     typeStack.append('float')
 
 def p_quad_save_char(p):
@@ -214,8 +221,10 @@ def p_quad_save_char(p):
     global operandStack, typeStack
     
     currentValue = p[-1]
+    if (currentValue not in constantDirectory['char'].keys()):
+        constantDirectory['char'][currentValue] = newConstVirtualDirection('char')
 
-    operandStack.append(currentValue)
+    operandStack.append(constantDirectory['char'][currentValue])
     typeStack.append('char')
 
 def p_quad_close_parenthesis(p):
@@ -264,7 +273,12 @@ def p_quad_insert_string(p):
     global typeStack, operandStack
 
     typeStack.append('STRING')
-    operandStack.append(p[-1])
+
+    currentValue = p[-1]
+    if (currentValue not in constantDirectory['string'].keys()):
+        constantDirectory['string'][currentValue] = newConstVirtualDirection('string')
+
+    operandStack.append(constantDirectory['string'][currentValue])
 
 def p_write_param(p):
     '''write_param  : write_param COMMA write_param
@@ -411,7 +425,7 @@ def p_quad_generate_control_variable(p):
 
 def p_quad_generate_final_control_variable(p):
     '''quad_generate_final_control_variable :   '''
-    global operandStack, typeStack, operatorStack, quadCounter, quadruples, forControlStack, tmpCounter
+    global operandStack, typeStack, operatorStack, quadCounter, quadruples, forControlStack
 
     currentExp = operandStack[-1]
     currentExpType = typeStack[-1]
@@ -420,8 +434,7 @@ def p_quad_generate_final_control_variable(p):
         print('You can only assign integer values for stop conditions in a FOR loop')
         exit()
 
-    stopCondition = 't' +  str(tmpCounter)
-    tmpCounter = tmpCounter + 1
+    stopCondition = newTempVirtualDirection(currentType)
 
     # generate stop condition variable assignment quad
     # TODO: replace this for virtual memory
@@ -430,8 +443,7 @@ def p_quad_generate_final_control_variable(p):
     quadCounter = quadCounter + 1
 
     controlVariable = forControlStack[-1]
-    result = 't' +  str(tmpCounter)
-    tmpCounter = tmpCounter + 1
+    result = newTempVirtualDirection(currentType)
 
     # generate stop condition variable assignment quad
     quadruple = ('<', controlVariable, stopCondition, result)
@@ -450,14 +462,16 @@ def p_quad_generate_final_control_variable(p):
 def p_quad_generate_end_for_iteration(p):
     '''quad_generate_end_for_iteration  :   '''
 
-    global operandStack, typeStack, operatorStack, quadCounter, quadruples, forControlStack, tmpCounter
+    global operandStack, typeStack, operatorStack, quadCounter, quadruples, forControlStack
 
     controlVariable = forControlStack.pop()
 
-    result = 't' +  str(tmpCounter)
-    tmpCounter = tmpCounter + 1
+    result = newTempVirtualDirection('int')
 
-    quadruple = ('+', controlVariable, 1, result)
+    if (1 not in constantDirectory['int'].keys()):
+        constantDirectory['int'][1] = newConstVirtualDirection('int')
+
+    quadruple = ('+', controlVariable, constantDirectory['int'][1], result)
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
 
@@ -517,7 +531,8 @@ def p_save_variable_name(p):
         exit()
     else:
         functionDirectory[currentFunction]['vars'][localVariableName] = {
-            'type': currentType
+            'type': currentType,
+            'virDir': newVirtualDirection(currentType, currentFunction, programName)
         }
 
 def p_vars_body(p):
@@ -604,6 +619,9 @@ def main(fileName):
 
     # print(operandStack)
     # print(typeStack)
+
+    print(functionDirectory)
+    print(constantDirectory)
 
     print('******* Cuadruplos generados *******')
     counter = 0

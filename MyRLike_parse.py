@@ -437,7 +437,6 @@ def p_quad_generate_final_control_variable(p):
     stopCondition = newTempVirtualDirection(currentType)
 
     # generate stop condition variable assignment quad
-    # TODO: replace this for virtual memory
     quadruple = ('=', currentExp, '', stopCondition) # Pending quadruple
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1

@@ -30,7 +30,7 @@ Para lo mencionado anteriormente se generaron los cuadruplos correspondientes y 
 No hubo :(
 
 # Avance 5
-
+Para este avance se entrega el codigo necesario para generar cuadruplos en los ciclos del programa y tambien se dejan de utilizar variables para utilizar direcciones virtuales, se entregan las direcciones virtuales funcionando.
 
 *Ejemplo*
 

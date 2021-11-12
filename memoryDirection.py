@@ -95,3 +95,12 @@ def newConstVirtualDirection(currentType):
     auxMemory['counter'] = auxMemory['counter'] + 1
 
     return result
+
+def resetLocalAndTempCounters():
+    virtualMemoryDirectionMap['l_int']['counter'] = 0
+    virtualMemoryDirectionMap['l_float']['counter'] = 0
+    virtualMemoryDirectionMap['l_char']['counter'] = 0
+
+    virtualMemoryDirectionMap['t_int']['counter'] = 0
+    virtualMemoryDirectionMap['t_float']['counter'] = 0
+    virtualMemoryDirectionMap['t_char']['counter'] = 0

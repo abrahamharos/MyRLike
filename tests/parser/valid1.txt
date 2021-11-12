@@ -14,6 +14,11 @@ VARS int x;
     return (j);
 }
 
+func int multiplication (int i, int j)
+{
+    return (i * j);
+}
+
 main(){
     if (p < 1) {
         p = 1;

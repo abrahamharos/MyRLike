@@ -5,7 +5,7 @@ tokens = MyRLike_lex.tokens
 from ply import yacc
 import pprint
 from cuboSemantico import CS, checkValidOperators
-from memoryDirection import newVirtualDirection, newTempVirtualDirection, newConstVirtualDirection
+from memoryDirection import newVirtualDirection, newTempVirtualDirection, newConstVirtualDirection, resetLocalAndTempCounters
 
 # TODO: Move this declaration/functions to a separate file.
 # TODO: Delete VAR tables once parser finish
@@ -611,6 +611,8 @@ def p_save_function_data(p):
     functionDirectory[currentFunction] = {
         'type': currentType
     }
+
+    resetLocalAndTempCounters()
 
 def p_return(p):
     '''return       :   RETURN LPAREN exp RPAREN'''

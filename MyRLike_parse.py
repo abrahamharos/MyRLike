@@ -573,9 +573,16 @@ def p_save_VARTable(p):
     if not("vars" in functionDirectory[currentFunction].keys()):
         functionDirectory[currentFunction]['vars'] = {}
 
+def p_count_fucntion_parameter(p):
+    '''count_function_parameter : '''
+    global functionDirectory, currentFunction, currentType
+
+    functionDirectory[currentFunction]['parameters'].append(currentType)
+
+
 def p_func_params(p):
     '''func_params  :   func_params COMMA func_params
-                    |   save_VARTable type ID save_variable_name'''
+                    |   save_VARTable type ID save_variable_name count_function_parameter'''
 
 def p_func_type(p):
     '''func_type    :   type
@@ -645,6 +652,9 @@ def p_save_function_data(p):
         'float': 0,
         'char': 0
     }
+
+    # Init parameter array.
+    functionDirectory[currentFunction]['parameters'] = []
 
 def p_return(p):
     '''return       :   RETURN LPAREN exp RPAREN'''

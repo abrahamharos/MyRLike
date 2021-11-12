@@ -604,7 +604,7 @@ def p_save_function_data(p):
         print("Function " + localFunctionName + " declared multiple times")
         exit()
 
-    global currentType, currentFunction
+    global currentType, currentFunction, quadCounter
     
     currentFunction = localFunctionName
 
@@ -613,6 +613,9 @@ def p_save_function_data(p):
     }
 
     resetLocalAndTempCounters()
+
+    # Save initial direction (instruction pointer) of the function
+    functionDirectory[currentFunction]['initialDirection'] = quadCounter
 
 def p_return(p):
     '''return       :   RETURN LPAREN exp RPAREN'''
@@ -638,14 +641,16 @@ def main(fileName):
     # print(operandStack)
     # print(typeStack)
 
-    print(functionDirectory)
-    print(constantDirectory)
-
     print('******* Cuadruplos generados *******')
     counter = 0
     for quad in quadruples:
         print(str(counter) + ' -\t' + str(quad))
         counter = counter + 1
+
+    print('\n\n')
+    pprint.pprint(functionDirectory)
+    #print('\n\n')
+    #print(constantDirectory)
     
     return result
 

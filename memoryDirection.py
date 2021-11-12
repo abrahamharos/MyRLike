@@ -1,63 +1,82 @@
 MAX_SLOTS = 3000
-INITIAL_DIR = 0
+INITIAL_DIR = 3000
 
 class virtualMemory:
     def __init__(self):
+        initialDirections = [i for i in range(INITIAL_DIR ,INITIAL_DIR + MAX_SLOTS * 13, MAX_SLOTS)]
+        
         self.virtualMemoryDirectionMap = {
             'g_int': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 0,
+                'initialDirection': initialDirections[0],
                 'counter': 0
             },
             'g_float': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 1,
+                'initialDirection': initialDirections[1],
                 'counter': 0
             },
             'g_char': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 2,
+                'initialDirection': initialDirections[2],
                 'counter': 0
             },
             'l_int': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 3,
+                'initialDirection': initialDirections[3],
                 'counter': 0
             },
             'l_float': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 4,
+                'initialDirection': initialDirections[4],
                 'counter': 0
             },
             'l_char': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 5,
+                'initialDirection': initialDirections[5],
                 'counter': 0
             },
             't_int': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 6,
+                'initialDirection': initialDirections[6],
                 'counter': 0
             },
             't_float': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 7,
+                'initialDirection': initialDirections[7],
                 'counter': 0
             },
             't_char': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 8,
+                'initialDirection': initialDirections[8],
                 'counter': 0
             },
             'c_int': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 9,
+                'initialDirection': initialDirections[9],
                 'counter': 0
             },
             'c_float': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 10,
+                'initialDirection': initialDirections[10],
                 'counter': 0
             },
             'c_char': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 11,
+                'initialDirection': initialDirections[11],
                 'counter': 0
             },
             'c_string': {
-                'initialDirection': INITIAL_DIR + MAX_SLOTS * 12,
+                'initialDirection': initialDirections[12],
                 'counter': 0
             },
         }
 
+        self.inverseVirtualMemoryDirectionMap = {
+            initialDirections[0]: 'g_int',
+            initialDirections[1]: 'g_float',
+            initialDirections[2]: 'g_char',
+            initialDirections[3]: 'l_int',
+            initialDirections[4]: 'l_float',
+            initialDirections[5]: 'l_char',
+            initialDirections[6]: 't_int',
+            initialDirections[7]: 't_float',
+            initialDirections[8]: 't_char',
+            initialDirections[9]: 'c_int',
+            initialDirections[10]: 'c_float',
+            initialDirections[11]: 'c_char',
+            initialDirections[12]: 'c_string',
+        }
+        print(self.inverseVirtualMemoryDirectionMap)
+        
     def newVirtualDirection(self, currentType, currentFunction, programName):
         prefix = 'l_'
         if currentFunction == programName:

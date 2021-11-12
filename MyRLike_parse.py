@@ -35,9 +35,9 @@ memoryDirection = MD.virtualMemory()
 
 
 def p_program(p):
-    '''program      : PROGRAM ID save_program_data SEMI body
-                    | PROGRAM ID save_program_data SEMI vars_dec body
-                    | PROGRAM ID save_program_data SEMI vars_dec func_dec save_main_ip body'''
+    '''program      : PROGRAM ID save_program_data SEMI save_main_ip body end_function
+                    | PROGRAM ID save_program_data SEMI vars_dec save_main_ip body end_function
+                    | PROGRAM ID save_program_data SEMI vars_dec func_dec save_main_ip body end_function'''
     
     global functionDirectory
     
@@ -66,13 +66,21 @@ def p_save_program_data(p):
     currentType = 'program'
 
     functionDirectory[currentFunction] = {
-        'type': currentType
+        'type': currentType,
+        'vars': {}
     }
 
     jumpStack.append(quadCounter)
     quadruple = ('goto', '', '', '') # Pending quadruple
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
+
+    memoryDirection.resetLocalAndTempCounters()
+
+    # Init size of the function, each field indicates the # of variables of that type
+    # [# ints, # floats, # chars]
+    functionDirectory[currentFunction]['size'] = [0, 0, 0]
+
 
 def p_set_main_current_function(p):
     '''set_main_current_function :   '''
@@ -623,10 +631,9 @@ def p_save_variable_name(p):
         }
     
         # Update function size
-        if(currentFunction != programName):
-            typeOrder = {'int':0, 'float':1, 'char':2}
-            index = typeOrder[currentType]
-            functionDirectory[currentFunction]['size'][index] = functionDirectory[currentFunction]['size'][index] + 1
+        typeOrder = {'int':0, 'float':1, 'char':2}
+        index = typeOrder[currentType]
+        functionDirectory[currentFunction]['size'][index] = functionDirectory[currentFunction]['size'][index] + 1
 
 def p_vars_body(p):
     '''vars_body    : vars_body vars_body
@@ -667,17 +674,23 @@ def p_func_type(p):
         global currentType
         currentType = p[1]
 
-def p_end_func(p):
-    '''end_function : '''
-    global functionDirectory, currentFunction, quadruples, quadCounter
+def p_del_var_table(p):
+    '''del_var_table : '''
+
+    global functionDirectory, currentFunction
 
     # Delete VARS table since is not longer needed
     del functionDirectory[currentFunction]['vars']
 
-    # Generate ENDFUNC quadruple
-    quadruple = ('ENDFUNC', '', '', '') # Pending quadruple
-    quadruples.append(quadruple)
-    quadCounter = quadCounter + 1
+def p_end_func(p):
+    '''end_function : del_var_table'''
+    global functionDirectory, currentFunction, quadruples, quadCounter
+
+    if(currentFunction != programName):
+        # Generate ENDFUNC quadruple
+        quadruple = ('ENDFUNC', '', '', '') # Pending quadruple
+        quadruples.append(quadruple)
+        quadCounter = quadCounter + 1
 
     # Update size of the function with the space used by temporal variables
     tempCounters = memoryDirection.getTempCounters()
@@ -734,6 +747,16 @@ def p_error(t):
     print("Syntax error at '%s'" % t.value)
     sys.exit(1)
 
+# To flip key => value and delete sectioning
+def transform_constant_directory():    
+    aux = constantDirectory['int'].copy()
+    aux.update(constantDirectory['float'])
+    aux.update(constantDirectory['char'])
+    aux.update(constantDirectory['string'])
+
+    result = dict((x,y) for y,x in aux.items())
+
+    return result
 
 # To call the parser run MyRLike_parse.py with the name of the txt file
 # Example:
@@ -762,11 +785,14 @@ def main(programFileName, exportedFileName):
     print('\n\n')
     print(constantDirectory)
 
+    tConstantDirectory = transform_constant_directory()
+
     # Export compiled file that will be use for the Virtual Machine
     try:
         data = json.dumps({
+            'programName': programName,
             'functionDirectory': functionDirectory,
-            'constants': constantDirectory,
+            'constantDirectory': tConstantDirectory,
             'quadruples': quadruples
         })
 

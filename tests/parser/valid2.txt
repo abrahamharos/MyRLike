@@ -1,0 +1,11 @@
+Program MyRlike;
+
+VARS
+    int i, j, p, arreglo[10];
+    float valor;
+
+main(){
+    if (p < 1) {
+        p = 1;
+    }
+}

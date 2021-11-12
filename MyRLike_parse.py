@@ -7,8 +7,6 @@ import pprint
 from cuboSemantico import CS, checkValidOperators
 import MemoryDirection as MD
 
-# TODO: Move this declaration/functions to a separate file.
-# TODO: Delete VAR tables once parser finish
 functionDirectory = {}
 currentType = ''
 currentVariableName = ''
@@ -30,6 +28,8 @@ temporals = []
 jumpStack = []
 quadCounter = 0
 forControlStack = []
+parameterCounter = 0
+calledFunction = ''
 
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI body
@@ -99,7 +99,7 @@ def p_statement(p):
 
 def p_quad_generate_assignment(p):
     '''quad_generate_assignment : '''
-    global operatorStack, operandStack, typeStack, temporals, quadruples, quadCounter
+    global operatorStack, operandStack, typeStack, temporals, quadruples, quadCounter, functionDirectory, currentFunction
     
     if (len(operatorStack) > 0):
         currentOperator = operatorStack[-1]
@@ -110,7 +110,7 @@ def p_quad_generate_assignment(p):
             rightType = typeStack.pop()
             leftOperand = operandStack.pop()
             leftType = typeStack.pop()
-            
+
             resultType = checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentOperator)
 
             quadruple = (currentOperator, rightOperand, '', leftOperand)
@@ -261,13 +261,81 @@ def p_f(p):
                     | CHAR quad_save_char'''
     pass
 
+def p_function_parameter(p):
+    '''function_parameter : '''
+    
+    global operandStack, typeStack, functionDirectory, calledFunction, parameterCounter, quadCounter, quadruples
+
+    argument = operandStack.pop()
+    argumentType = typeStack.pop()
+
+    nParameters = len(functionDirectory[calledFunction]['parameters'])
+    if(parameterCounter >= nParameters):
+        print("ERROR when calling function \'" + calledFunction + "\'\nExpected: " + str(nParameters) + " parameters")
+        print("Received: " + str(parameterCounter + 1))
+        exit()
+
+    # Verify argument type against parameter table
+    expectedParameterType = functionDirectory[calledFunction]['parameters'][parameterCounter]
+
+    if (argumentType != expectedParameterType):
+        print("ERROR when calling function \'" + calledFunction + "\'\nExpected: \'" + expectedParameterType + "\' as paremeter")
+        print("Received: \'" + argumentType + "\'")
+        exit()
+
+    quadruple = ('PARAMETER', '', argument, parameterCounter)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+    
+    parameterCounter = parameterCounter + 1
+
 def p_call_param(p):
     '''call_param   : call_param COMMA call_param
-                    | exp'''
+                    | exp function_parameter'''
     pass
 
+def p_function_verify_ERA(p):
+    '''function_verify_ERA : '''
+
+    global functionDirectory, quadruples, quadCounter, parameterCounter, calledFunction
+
+    calledFunction = p[-1]
+
+    # verify that function exists
+    if(calledFunction not in functionDirectory.keys()):
+        print("ERROR: Function named \'" + calledFunction + "\' does not exist")
+        exit()
+    
+    # generate ERA action
+    functionSize = functionDirectory[calledFunction]['size']
+    quadruple = ('ERA', '', '', functionSize)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    # Start parameter counter
+    parameterCounter = 0
+
+def p_function_end_call(p):
+    '''function_end_call : '''
+
+    global functionDirectory, calledFunction, parameterCounter, quadruples, quadCounter
+
+    # Verify that all parameters were provided
+    nParameters = len(functionDirectory[calledFunction]['parameters'])
+    if(parameterCounter < nParameters):
+        print("ERROR when calling function \'" + calledFunction + "\'\nExpected: " + str(nParameters) + " parameters")
+        print("Received: " + str(parameterCounter))
+        exit()
+    
+    # generate GOSUB quadruple
+    initialDirection = functionDirectory[calledFunction]['initialDirection']
+    quadruple = ('GOSUB', '', calledFunction, initialDirection)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
 def p_call(p):
-    '''call         : ID LPAREN call_param RPAREN'''
+    '''call         : ID function_verify_ERA LPAREN call_param RPAREN function_end_call
+                    | ID function_verify_ERA LPAREN RPAREN function_end_call'''
     pass
 
 def p_quad_generate_read(p):
@@ -680,6 +748,9 @@ def main(fileName):
     # print(operandStack)
     # print(typeStack)
 
+    print('\n\n')
+    pprint.pprint(functionDirectory)
+
     print('******* Cuadruplos generados *******')
     counter = 0
     for quad in quadruples:
@@ -687,9 +758,7 @@ def main(fileName):
         counter = counter + 1
 
     print('\n\n')
-    pprint.pprint(functionDirectory)
-    #print('\n\n')
-    #print(constantDirectory)
+    print(constantDirectory)
     
     return result
 

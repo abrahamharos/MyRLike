@@ -133,15 +133,15 @@ def checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentO
                 resultType = CS[leftType][rightType][currentOperator]
             else:
                 print('Type mismatch ' + leftType + ' and ' + rightType + ' can not use the ' + currentOperator + ' operator')
-                print('Variables: ' + rightOperand + ' and ' + leftOperand)
+                print('Variables: ' + str(rightOperand) + ' and ' + str(leftOperand))
                 exit()
         else:
             print('Type mismatch ' + leftType + ' and ' + rightType + ' can not use the ' + currentOperator + ' operator')
-            print('Variables: ' + rightOperand + ' and ' + leftOperand)
+            print('Variables: ' + str(rightOperand) + ' and ' + str(leftOperand))
             exit()
     else:
         print('Type mismatch ' + leftType + ' and ' + rightType + ' can not use the ' + currentOperator + ' operator')
-        print('Variables: ' + rightOperand + ' and ' + leftOperand)
+        print('Variables: ' + str(rightOperand) + ' and ' + str(leftOperand))
         exit()
     
     return resultType

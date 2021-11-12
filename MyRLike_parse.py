@@ -6,6 +6,7 @@ from ply import yacc
 import pprint
 from cuboSemantico import CS, checkValidOperators
 import MemoryDirection as MD
+import json
 
 functionDirectory = {}
 currentType = ''
@@ -737,12 +738,12 @@ def p_error(t):
 # To call the parser run MyRLike_parse.py with the name of the txt file
 # Example:
 # python3 MyRLike_parse.py testValid.txt
-def main(fileName):
-    fileName = open(fileName).read()
+def main(programFileName, exportedFileName):
+    programFileName = open(programFileName).read()
 
     parser = yacc.yacc()
 
-    yacc.parse(fileName)
+    yacc.parse(programFileName)
     result = "Valid tokens and sintax"
     print(result)
 
@@ -760,12 +761,30 @@ def main(fileName):
 
     print('\n\n')
     print(constantDirectory)
-    
+
+    # Export compiled file that will be use for the Virtual Machine
+    try:
+        data = json.dumps({
+            'functionDirectory': functionDirectory,
+            'constants': constantDirectory,
+            'quadruples': quadruples
+        })
+
+        compiledFile = open(exportedFileName, "w")
+        compiledFile.write(data)
+        compiledFile.close()
+
+        print('File compiled succesfully as ' + exportedFileName)
+    except:
+        print('An Error ocurred while saving the compiled file')
+        exit()
+        
     return result
 
 if __name__ == '__main__':
-    if(len(sys.argv) < 2):
+    if(len(sys.argv) < 3):
         print("Please provide a valid filename as parameter\n Example: tests/parser/valid1.txt")
+        print("And the name of the exported file\n Example: ovejota.myRLike")
         exit()
 
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])

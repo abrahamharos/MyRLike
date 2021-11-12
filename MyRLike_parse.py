@@ -78,8 +78,8 @@ def p_save_program_data(p):
     memoryDirection.resetLocalAndTempCounters()
 
     # Init size of the function, each field indicates the # of variables of that type
-    # [# ints, # floats, # chars]
-    functionDirectory[currentFunction]['size'] = [0, 0, 0]
+    # [# local ints, # local floats, # local chars, # temp ints, # temp floats, # temp chars ]
+    functionDirectory[currentFunction]['size'] = [0, 0, 0, 0, 0, 0]
 
 
 def p_set_main_current_function(p):
@@ -694,9 +694,9 @@ def p_end_func(p):
 
     # Update size of the function with the space used by temporal variables
     tempCounters = memoryDirection.getTempCounters()
-    functionDirectory[currentFunction]['size'][0] = functionDirectory[currentFunction]['size'][0] + tempCounters[0]
-    functionDirectory[currentFunction]['size'][1] = functionDirectory[currentFunction]['size'][1] + tempCounters[1]
-    functionDirectory[currentFunction]['size'][2] = functionDirectory[currentFunction]['size'][2] + tempCounters[2]
+    functionDirectory[currentFunction]['size'][3] = tempCounters[0]
+    functionDirectory[currentFunction]['size'][4] = tempCounters[1]
+    functionDirectory[currentFunction]['size'][5] = tempCounters[2]
 
 def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
@@ -733,14 +733,36 @@ def p_save_function_data(p):
     functionDirectory[currentFunction]['initialDirection'] = quadCounter
 
     # Init size of the function, each field indicates the # of variables of that type
-    # [# ints, # floats, # chars]
-    functionDirectory[currentFunction]['size'] = [0, 0, 0]
+    # [# local ints, # local floats, # local chars, # temp ints, # temp floats, # temp chars ]
+    functionDirectory[currentFunction]['size'] = [0, 0, 0, 0, 0, 0]
 
     # Init parameter array.
     functionDirectory[currentFunction]['parameters'] = []
 
+def p_quad_generate_return(p):
+    '''quad_generate_return : '''
+
+    global functionDirectory, currentFunction, quadruples, quadCounter, typeStack, operandStack
+
+    currentExpType = typeStack.pop()
+    functionReturnType = functionDirectory[currentFunction]['type']
+    if (currentExpType != functionReturnType):
+        print('Error: Type mismatch')
+        print('You can only return ' + functionReturnType + ' in the ' + currentFunction + ' function')
+        print('received type: ' + currentExpType)
+        exit()
+    
+    result = operandStack.pop()
+
+    if(currentFunction != programName):
+        # Generate RETURN quadruple
+        quadruple = ('RETURN', '', '', result)
+        quadruples.append(quadruple)
+        quadCounter = quadCounter + 1
+
+
 def p_return(p):
-    '''return       :   RETURN LPAREN exp RPAREN'''
+    '''return       :   RETURN LPAREN exp quad_generate_return RPAREN'''
     pass
 
 def p_error(t):

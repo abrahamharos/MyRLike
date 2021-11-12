@@ -31,6 +31,7 @@ forControlStack = []
 parameterCounter = 0
 calledFunction = ''
 
+
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI body
                     | PROGRAM ID save_program_data SEMI vars_dec body
@@ -621,7 +622,9 @@ def p_save_variable_name(p):
     
         # Update function size
         if(currentFunction != programName):
-            functionDirectory[currentFunction]['size'][currentType] = functionDirectory[currentFunction]['size'][currentType] + 1
+            typeOrder = {'int':0, 'float':1, 'char':2}
+            index = typeOrder[currentType]
+            functionDirectory[currentFunction]['size'][index] = functionDirectory[currentFunction]['size'][index] + 1
 
 def p_vars_body(p):
     '''vars_body    : vars_body vars_body
@@ -676,9 +679,9 @@ def p_end_func(p):
 
     # Update size of the function with the space used by temporal variables
     tempCounters = MD.getTempCounters()
-    functionDirectory[currentFunction]['size']['int'] = functionDirectory[currentFunction]['size']['int'] + tempCounters[0]
-    functionDirectory[currentFunction]['size']['float'] = functionDirectory[currentFunction]['size']['float'] + tempCounters[1]
-    functionDirectory[currentFunction]['size']['char'] = functionDirectory[currentFunction]['size']['char'] + tempCounters[2]
+    functionDirectory[currentFunction]['size'][0] = functionDirectory[currentFunction]['size'][0] + tempCounters[0]
+    functionDirectory[currentFunction]['size'][1] = functionDirectory[currentFunction]['size'][1] + tempCounters[1]
+    functionDirectory[currentFunction]['size'][2] = functionDirectory[currentFunction]['size'][2] + tempCounters[2]
 
 def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
@@ -715,11 +718,8 @@ def p_save_function_data(p):
     functionDirectory[currentFunction]['initialDirection'] = quadCounter
 
     # Init size of the function, each field indicates the # of variables of that type
-    functionDirectory[currentFunction]['size'] = {
-        'int': 0,
-        'float': 0,
-        'char': 0
-    }
+    # [# ints, # floats, # chars]
+    functionDirectory[currentFunction]['size'] = [0, 0, 0]
 
     # Init parameter array.
     functionDirectory[currentFunction]['parameters'] = []

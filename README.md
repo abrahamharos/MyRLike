@@ -34,5 +34,6 @@ Para este avance se entrega el codigo necesario para generar cuadruplos en los c
 
 *Ejemplo*
 
-    python3 MyRLike_parse.py tests/parser/testValid.txt
+    python3 MyRLike_parse.py tests/parser/testValid.txt program.myRLike
 Donde ***testValid.txt*** es la ruta del archivo a analizar.
+Y ***program.myRLike*** es el archivo compilado resultante

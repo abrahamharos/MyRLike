@@ -30,6 +30,7 @@ quadCounter = 0
 forControlStack = []
 parameterCounter = 0
 calledFunction = ''
+memoryDirection = MD.virtualMemory()
 
 
 def p_program(p):
@@ -169,7 +170,7 @@ def p_quad_generate(p):
             
             resultType = checkValidOperators(rightOperand, rightType, leftOperand, leftType, currentOperator)
 
-            result = MD.newTempVirtualDirection(resultType)
+            result = memoryDirection.newTempVirtualDirection(resultType)
             quadruple = (currentOperator, leftOperand, rightOperand, result)
             quadCounter = quadCounter + 1
             
@@ -218,7 +219,7 @@ def p_quad_save_int(p):
     
     currentValue = p[-1]
     if (currentValue not in constantDirectory['int'].keys()):
-        constantDirectory['int'][currentValue] = MD.newConstVirtualDirection('int')
+        constantDirectory['int'][currentValue] = memoryDirection.newConstVirtualDirection('int')
 
     operandStack.append(constantDirectory['int'][currentValue])
     typeStack.append('int')
@@ -229,7 +230,7 @@ def p_quad_save_float(p):
     
     currentValue = p[-1]
     if (currentValue not in constantDirectory['float'].keys()):
-        constantDirectory['float'][currentValue] = MD.newConstVirtualDirection('float')
+        constantDirectory['float'][currentValue] = memoryDirection.newConstVirtualDirection('float')
 
     operandStack.append(constantDirectory['float'][currentValue])
     typeStack.append('float')
@@ -240,7 +241,7 @@ def p_quad_save_char(p):
     
     currentValue = p[-1]
     if (currentValue not in constantDirectory['char'].keys()):
-        constantDirectory['char'][currentValue] = MD.newConstVirtualDirection('char')
+        constantDirectory['char'][currentValue] = memoryDirection.newConstVirtualDirection('char')
 
     operandStack.append(constantDirectory['char'][currentValue])
     typeStack.append('char')
@@ -362,7 +363,7 @@ def p_quad_insert_string(p):
 
     currentValue = p[-1]
     if (currentValue not in constantDirectory['string'].keys()):
-        constantDirectory['string'][currentValue] = MD.newConstVirtualDirection('string')
+        constantDirectory['string'][currentValue] = memoryDirection.newConstVirtualDirection('string')
 
     operandStack.append(constantDirectory['string'][currentValue])
 
@@ -520,7 +521,7 @@ def p_quad_generate_final_control_variable(p):
         print('You can only assign integer values for stop conditions in a FOR loop')
         exit()
 
-    stopCondition = MD.newTempVirtualDirection(currentType)
+    stopCondition = memoryDirection.newTempVirtualDirection(currentType)
 
     # generate stop condition variable assignment quad
     quadruple = ('=', currentExp, '', stopCondition) # Pending quadruple
@@ -528,7 +529,7 @@ def p_quad_generate_final_control_variable(p):
     quadCounter = quadCounter + 1
 
     controlVariable = forControlStack[-1]
-    result = MD.newTempVirtualDirection(currentType)
+    result = memoryDirection.newTempVirtualDirection(currentType)
 
     # generate stop condition variable assignment quad
     quadruple = ('<', controlVariable, stopCondition, result)
@@ -551,10 +552,10 @@ def p_quad_generate_end_for_iteration(p):
 
     controlVariable = forControlStack.pop()
 
-    result = MD.newTempVirtualDirection('int')
+    result = memoryDirection.newTempVirtualDirection('int')
 
     if (1 not in constantDirectory['int'].keys()):
-        constantDirectory['int'][1] = MD.newConstVirtualDirection('int')
+        constantDirectory['int'][1] = memoryDirection.newConstVirtualDirection('int')
 
     quadruple = ('+', controlVariable, constantDirectory['int'][1], result)
     quadruples.append(quadruple)
@@ -617,7 +618,7 @@ def p_save_variable_name(p):
     else:
         functionDirectory[currentFunction]['vars'][localVariableName] = {
             'type': currentType,
-            'virDir': MD.newVirtualDirection(currentType, currentFunction, programName)
+            'virDir': memoryDirection.newVirtualDirection(currentType, currentFunction, programName)
         }
     
         # Update function size
@@ -678,7 +679,7 @@ def p_end_func(p):
     quadCounter = quadCounter + 1
 
     # Update size of the function with the space used by temporal variables
-    tempCounters = MD.getTempCounters()
+    tempCounters = memoryDirection.getTempCounters()
     functionDirectory[currentFunction]['size'][0] = functionDirectory[currentFunction]['size'][0] + tempCounters[0]
     functionDirectory[currentFunction]['size'][1] = functionDirectory[currentFunction]['size'][1] + tempCounters[1]
     functionDirectory[currentFunction]['size'][2] = functionDirectory[currentFunction]['size'][2] + tempCounters[2]
@@ -712,7 +713,7 @@ def p_save_function_data(p):
         'type': currentType
     }
 
-    MD.resetLocalAndTempCounters()
+    memoryDirection.resetLocalAndTempCounters()
 
     # Save initial direction (instruction pointer) of the function
     functionDirectory[currentFunction]['initialDirection'] = quadCounter

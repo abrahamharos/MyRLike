@@ -1,4 +1,5 @@
 .DS_Store
+*.myRLike
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

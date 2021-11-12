@@ -34,17 +34,29 @@ forControlStack = []
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI body
                     | PROGRAM ID save_program_data SEMI vars_dec body
-                    | PROGRAM ID save_program_data SEMI vars_dec func_dec body'''
+                    | PROGRAM ID save_program_data SEMI vars_dec func_dec save_main_ip body'''
     
     global functionDirectory
     
     print('\n')
     #pprint.pprint(functionDirectory)
 
+# To save the # of quad where the main function begins.
+def p_save_main_ip(p):
+    '''save_main_ip : '''
+    global jumpStack, quadCounter, quadruples
+
+    # Fill the pending quadruple
+    endOfTheJump = jumpStack.pop()
+    currentQuad = quadruples[endOfTheJump]
+    quadruple = (currentQuad[0], currentQuad[1], currentQuad[2], quadCounter)
+
+    quadruples[endOfTheJump] = quadruple
+
 def p_save_program_data(p):
     '''save_program_data : '''
     
-    global programName, currentType, currentFunction
+    global programName, currentType, currentFunction, jumpStack, quadruples, quadCounter
     
     programName = p[-1]
     currentFunction = p[-1]
@@ -53,6 +65,11 @@ def p_save_program_data(p):
     functionDirectory[currentFunction] = {
         'type': currentType
     }
+
+    jumpStack.append(quadCounter)
+    quadruple = ('goto', '', '', '') # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
 
 def p_set_main_current_function(p):
     '''set_main_current_function :   '''

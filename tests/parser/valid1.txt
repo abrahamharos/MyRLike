@@ -5,7 +5,9 @@ VARS
     float valor;
 
 func int fact (int j)
-VARS int x;
+VARS    int x;
+        float y;
+        char z;
 {
     valor = i + 1;
     valor = i + 1.1;
@@ -16,6 +18,7 @@ VARS int x;
 
 func int multiplication (int i, int j)
 {
+    i = ((i * j) + j) + j;
     return (i * j);
 }
 

@@ -5,7 +5,7 @@ tokens = MyRLike_lex.tokens
 from ply import yacc
 import pprint
 from cuboSemantico import CS, checkValidOperators
-from memoryDirection import newVirtualDirection, newTempVirtualDirection, newConstVirtualDirection, resetLocalAndTempCounters
+from memoryDirection import newVirtualDirection, newTempVirtualDirection, newConstVirtualDirection, resetLocalAndTempCounters, getTempCounters
 
 # TODO: Move this declaration/functions to a separate file.
 # TODO: Delete VAR tables once parser finish
@@ -538,7 +538,7 @@ def p_vars_id_dec(p):
 def p_save_variable_name(p):
     '''save_variable_name : '''
     
-    global functionDirectory, currentFunction, currentType, currentVariableName
+    global functionDirectory, currentFunction, currentType, currentVariableName, programName
     localVariableName = p[-1]
     
     if localVariableName in functionDirectory[currentFunction]['vars']:
@@ -550,6 +550,10 @@ def p_save_variable_name(p):
             'type': currentType,
             'virDir': newVirtualDirection(currentType, currentFunction, programName)
         }
+    
+        # Update function size
+        if(currentFunction != programName):
+            functionDirectory[currentFunction]['size'][currentType] = functionDirectory[currentFunction]['size'][currentType] + 1
 
 def p_vars_body(p):
     '''vars_body    : vars_body vars_body
@@ -583,12 +587,30 @@ def p_func_type(p):
         global currentType
         currentType = p[1]
 
+def p_end_func(p):
+    '''end_function : '''
+    global functionDirectory, currentFunction, quadruples, quadCounter
+
+    # Delete VARS table since is not longer needed
+    del functionDirectory[currentFunction]['vars']
+
+    # Generate ENDFUNC quadruple
+    quadruple = ('ENDFUNC', '', '', '') # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    # Update size of the function with the space used by temporal variables
+    tempCounters = getTempCounters()
+    functionDirectory[currentFunction]['size']['int'] = functionDirectory[currentFunction]['size']['int'] + tempCounters[0]
+    functionDirectory[currentFunction]['size']['float'] = functionDirectory[currentFunction]['size']['float'] + tempCounters[1]
+    functionDirectory[currentFunction]['size']['char'] = functionDirectory[currentFunction]['size']['char'] + tempCounters[2]
+
 def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
-                    |   FUNC func_type ID save_function_data LPAREN RPAREN vars_dec block
-                    |   FUNC func_type ID save_function_data LPAREN func_params RPAREN vars_dec block
-                    |   FUNC func_type ID save_function_data LPAREN RPAREN block
-                    |   FUNC func_type ID save_function_data LPAREN func_params RPAREN block'''
+                    |   FUNC func_type ID save_function_data LPAREN RPAREN vars_dec block end_function
+                    |   FUNC func_type ID save_function_data LPAREN func_params RPAREN vars_dec block end_function
+                    |   FUNC func_type ID save_function_data LPAREN RPAREN block end_function
+                    |   FUNC func_type ID save_function_data LPAREN func_params RPAREN block end_function'''
 
 def p_save_function_data(p):
     '''save_function_data : '''
@@ -616,6 +638,13 @@ def p_save_function_data(p):
 
     # Save initial direction (instruction pointer) of the function
     functionDirectory[currentFunction]['initialDirection'] = quadCounter
+
+    # Init size of the function, each field indicates the # of variables of that type
+    functionDirectory[currentFunction]['size'] = {
+        'int': 0,
+        'float': 0,
+        'char': 0
+    }
 
 def p_return(p):
     '''return       :   RETURN LPAREN exp RPAREN'''

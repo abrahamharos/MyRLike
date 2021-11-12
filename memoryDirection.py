@@ -104,3 +104,12 @@ def resetLocalAndTempCounters():
     virtualMemoryDirectionMap['t_int']['counter'] = 0
     virtualMemoryDirectionMap['t_float']['counter'] = 0
     virtualMemoryDirectionMap['t_char']['counter'] = 0
+
+def getTempCounters():
+    iCounter = virtualMemoryDirectionMap['t_int']['counter']
+    fCounter = virtualMemoryDirectionMap['t_float']['counter']
+    cCounter = virtualMemoryDirectionMap['t_char']['counter'] = 0
+
+    result = [iCounter, fCounter, cCounter]
+
+    return result

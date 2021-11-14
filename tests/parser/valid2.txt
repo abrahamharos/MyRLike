@@ -5,6 +5,8 @@ VARS
     float valor;
 
 main(){
+    p = 1;
+    p = p + 1;
     if (p < 1) {
         p = 1;
     }

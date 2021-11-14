@@ -61,22 +61,21 @@ class virtualMemory:
         }
 
         self.inverseVirtualMemoryDirectionMap = {
-            initialDirections[0]: 'g_int',
-            initialDirections[1]: 'g_float',
-            initialDirections[2]: 'g_char',
-            initialDirections[3]: 'l_int',
-            initialDirections[4]: 'l_float',
-            initialDirections[5]: 'l_char',
-            initialDirections[6]: 't_int',
-            initialDirections[7]: 't_float',
-            initialDirections[8]: 't_char',
-            initialDirections[9]: 'c_int',
-            initialDirections[10]: 'c_float',
-            initialDirections[11]: 'c_char',
-            initialDirections[12]: 'c_string',
+            1: 'g_int',
+            2: 'g_float',
+            3: 'g_char',
+            4: 'l_int',
+            5: 'l_float',
+            6: 'l_char',
+            7: 't_int',
+            8: 't_float',
+            9: 't_char',
+            10: 'c_int',
+            11: 'c_float',
+            12: 'c_char',
+            13: 'c_string',
         }
-        print(self.inverseVirtualMemoryDirectionMap)
-        
+
     def newVirtualDirection(self, currentType, currentFunction, programName):
         prefix = 'l_'
         if currentFunction == programName:

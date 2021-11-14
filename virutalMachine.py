@@ -107,6 +107,54 @@ def main(filename):
                 varTable[res[0]][res[1]][res[2]] = op1 / op2
             
         # Operaciones logicas <, >, ==, !=, ||, &, >=, <=
+        operacionesLogicas = ['<', '>', '==', '!=', '||', '&', '>=', '<=']
+        if (operator in operacionesLogicas):
+            op1 = getValueFromMemoryAddress(operand1)
+            op2 = getValueFromMemoryAddress(operand2)
+            res = getMemoryFromMemoryAddress(saveResult)
+
+            if (operator == '<'):
+                if (op1 < op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                varTable[res[0]][res[1]][res[2]] = tempRes
+            if (operator == '>'):
+                if (op1 > op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                varTable[res[0]][res[1]][res[2]] = tempRes
+            if (operator == '=='):
+                if (op1 == op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                varTable[res[0]][res[1]][res[2]] = tempRes
+            if (operator == '||'):
+                if (op1 or op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                varTable[res[0]][res[1]][res[2]] = tempRes
+            if (operator == '&'):
+                if (op1 and op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                varTable[res[0]][res[1]][res[2]] = tempRes
+            if (operator == '>='):
+                if (op1 >= op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                varTable[res[0]][res[1]][res[2]] = tempRes
+            if (operator == '<='):
+                if (op1 <= op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                varTable[res[0]][res[1]][res[2]] = tempRes
 
         # Asignaciones =
         if (operator == '='):

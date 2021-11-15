@@ -1,0 +1,34 @@
+Program MyRlike;
+
+VARS
+    int i, j, p, x, arreglo[10];
+    float valor;
+    char hola;
+
+main(){
+    write("Introduce el valor de P: ");
+    read(p);
+    if (p > 1) {
+        write(p);
+    } else {
+        write("Vuelve a introducir el valor de P: ");
+        read(p);
+    }
+
+    write("Salto 2");
+    write("Introduce i para while loop");
+    read(i);
+    while(i >= 1) do {
+        write(p);
+        i = i - 1;
+    }
+    
+    write("Salto 3");
+    write("Introduce j para for loop");
+    read(j);
+    for x = 0 to j do {
+        write(p);
+    }
+
+    write("Adios amigo");
+}

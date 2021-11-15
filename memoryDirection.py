@@ -94,6 +94,7 @@ class virtualMemory:
 
     def newTempVirtualDirection(self, currentType):
         auxMemory = self.virtualMemoryDirectionMap['t_' + currentType]
+        print(currentType)
         result = auxMemory['initialDirection'] + auxMemory['counter']
 
         if(auxMemory['counter'] > MAX_SLOTS - 1):

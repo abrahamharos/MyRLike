@@ -3,9 +3,16 @@ Program MyRlike;
 VARS
     int i, j, p, arreglo[10];
     float valor;
+    char hola;
 
 main(){
-    p = 1;
+    read(valor);
+    read(hola);
+    read(p);
     p = p + 1;
     p = 1 + 1 + p + 2;
+    write(p);
+    write(hola);
+    write(valor);
+    write("Como te anda yendo");
 }

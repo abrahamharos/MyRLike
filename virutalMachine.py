@@ -1,6 +1,7 @@
 import json
 import sys
 import MemoryDirection as MD
+import fileinput
 import pprint
 
 functionDirectory = {}
@@ -85,71 +86,71 @@ def main(filename):
     while(IP < len(quadruples)):
         currentQuad = quadruples[IP]
         
-        operator = currentQuad[0]
+        operand0 = currentQuad[0]
         operand1 = currentQuad[1]
         operand2 = currentQuad[2]
-        saveResult = currentQuad[3]
+        operand3 = currentQuad[3]
 
         # Operaciones Aritmeticas + - * /
         operacionesAritmeticas = ['+', '-', '*', '/']
-        if(operator in operacionesAritmeticas):
+        if(operand0 in operacionesAritmeticas):
             op1 = getValueFromMemoryAddress(operand1)
             op2 = getValueFromMemoryAddress(operand2)
-            res = getMemoryFromMemoryAddress(saveResult)
+            res = getMemoryFromMemoryAddress(operand3)
 
-            if (operator == '+'):
+            if (operand0 == '+'):
                 varTable[res[0]][res[1]][res[2]] = op1 + op2
-            if (operator == '-'):
+            if (operand0 == '-'):
                 varTable[res[0]][res[1]][res[2]] = op1 - op2
-            if (operator == '*'):
+            if (operand0 == '*'):
                 varTable[res[0]][res[1]][res[2]] = op1 * op2
-            if (operator == '/'):
+            if (operand0 == '/'):
                 varTable[res[0]][res[1]][res[2]] = op1 / op2
             
         # Operaciones logicas <, >, ==, !=, ||, &, >=, <=
         operacionesLogicas = ['<', '>', '==', '!=', '||', '&', '>=', '<=']
-        if (operator in operacionesLogicas):
+        if (operand0 in operacionesLogicas):
             op1 = getValueFromMemoryAddress(operand1)
             op2 = getValueFromMemoryAddress(operand2)
-            res = getMemoryFromMemoryAddress(saveResult)
+            res = getMemoryFromMemoryAddress(operand3)
 
-            if (operator == '<'):
+            if (operand0 == '<'):
                 if (op1 < op2):
                     tempRes = 1
                 else:
                     tempRes = 0
                 varTable[res[0]][res[1]][res[2]] = tempRes
-            if (operator == '>'):
+            if (operand0 == '>'):
                 if (op1 > op2):
                     tempRes = 1
                 else:
                     tempRes = 0
                 varTable[res[0]][res[1]][res[2]] = tempRes
-            if (operator == '=='):
+            if (operand0 == '=='):
                 if (op1 == op2):
                     tempRes = 1
                 else:
                     tempRes = 0
                 varTable[res[0]][res[1]][res[2]] = tempRes
-            if (operator == '||'):
+            if (operand0 == '||'):
                 if (op1 or op2):
                     tempRes = 1
                 else:
                     tempRes = 0
                 varTable[res[0]][res[1]][res[2]] = tempRes
-            if (operator == '&'):
+            if (operand0 == '&'):
                 if (op1 and op2):
                     tempRes = 1
                 else:
                     tempRes = 0
                 varTable[res[0]][res[1]][res[2]] = tempRes
-            if (operator == '>='):
+            if (operand0 == '>='):
                 if (op1 >= op2):
                     tempRes = 1
                 else:
                     tempRes = 0
                 varTable[res[0]][res[1]][res[2]] = tempRes
-            if (operator == '<='):
+            if (operand0 == '<='):
                 if (op1 <= op2):
                     tempRes = 1
                 else:
@@ -157,21 +158,62 @@ def main(filename):
                 varTable[res[0]][res[1]][res[2]] = tempRes
 
         # Asignaciones =
-        if (operator == '='):
+        if (operand0 == '='):
             op1 = getValueFromMemoryAddress(operand1)
-            res = getMemoryFromMemoryAddress(saveResult)
-
+            res = getMemoryFromMemoryAddress(operand3)
             varTable[res[0]][res[1]][res[2]] = op1
 
         # Operaciones READ, WRITE
+        if (operand0 == 'READ'):
+            res = getMemoryFromMemoryAddress(operand3)
+            tempInput = input()
+            if (res[1] == 'int'):
+                try:
+                    temp = int(tempInput)
+                except:
+                    print('Error: expected value type: INT')
+                    exit()
+            if (res[1] == 'float'):
+                try:
+                    temp = float(tempInput)
+                except:
+                    print('Error: expected value type: FLOAT')
+                    exit()
+            if (res[1] == 'char'):
+                try:
+                    temp = str(tempInput)
+                    if(len(temp) > 1):
+                        print('Error: expected a single character')
+                        exit()
+                except:
+                    print('Error: expected value type: CHAR')
+                    exit()
+                
+            # Check type
+            varTable[res[0]][res[1]][res[2]] = temp
+
+        if (operand0 == 'WRITE'):
+            # This allows to print Null value (for debugging)
+            # TODO: for strings trim the "" 
+            res = getValueFromMemoryAddress(operand3)
+            print(res)
 
         # Saltos goto, gotof
+        if (operand0 == 'goto'):
+            IP = int(operand3)
+            continue
+        
+        if (operand0 == 'gotof'):
+            res = getValueFromMemoryAddress(operand1)
+            if (res == 0):
+                IP = int(operand3)
+                continue
+
 
         # Funciones ERA, GOSUB, PARAMETER, ENDFUNC, RETURN
 
 
         IP = IP + 1
-    pprint.pprint(varTable)
 
 if __name__ == '__main__':
     if(len(sys.argv) < 2):

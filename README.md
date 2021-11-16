@@ -29,8 +29,13 @@ Para lo mencionado anteriormente se generaron los cuadruplos correspondientes y 
 ## Avance 4
 No hubo :(
 
-# Avance 5
+## Avance 5
 Para este avance se entrega el codigo necesario para generar cuadruplos en los ciclos del programa y tambien se dejan de utilizar variables para utilizar direcciones virtuales, se entregan las direcciones virtuales funcionando.
+
+## Avance 6
+En este avance se entrega la generacion de codigo para funciones en el compilador, el mapa de memoria de ejecucion para la maquina virtual.
+Dentro de la maquina virtual se entrega el codigo para montar el programa y la memoria así como tambien el código para ejecutar expresiones aritmeticas, estatutos secuenciales y condicionales.
+Por ultimo, se entrega la generación de codigo para la declaracion de arreglos 
 
 *Ejemplo*
 

@@ -1,7 +1,6 @@
 import json
 import sys
 import MemoryDirection as MD
-import fileinput
 import pprint
 
 functionDirectory = {}
@@ -211,7 +210,6 @@ def main(filename):
 
 
         # Funciones ERA, GOSUB, PARAMETER, ENDFUNC, RETURN
-
 
         IP = IP + 1
 

@@ -76,7 +76,7 @@ class virtualMemory:
             13: 'c_string',
         }
 
-    def newVirtualDirection(self, currentType, currentFunction, programName):
+    def newVirtualDirection(self, currentType, currentFunction, programName, arrSize):
         prefix = 'l_'
         if currentFunction == programName:
             prefix = 'g_'
@@ -88,13 +88,12 @@ class virtualMemory:
             print('Error: Too many variables declared (max is ' + str(MAX_SLOTS) + ')')
             exit()
         
-        auxMemory['counter'] = auxMemory['counter'] + 1
+        auxMemory['counter'] = auxMemory['counter'] + arrSize
 
         return result
 
     def newTempVirtualDirection(self, currentType):
         auxMemory = self.virtualMemoryDirectionMap['t_' + currentType]
-        print(currentType)
         result = auxMemory['initialDirection'] + auxMemory['counter']
 
         if(auxMemory['counter'] > MAX_SLOTS - 1):

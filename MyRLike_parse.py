@@ -33,6 +33,9 @@ parameterCounter = 0
 calledFunction = ''
 memoryDirection = MD.virtualMemory()
 
+# Arrays
+currentDim = 0
+currentR = 0
 
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI save_main_ip body end_function
@@ -604,15 +607,71 @@ def p_type(p):
     global currentType
     currentType = p[1]
 
+def p_array_save_limit(p):
+    '''array_save_limit : '''
+
+    global functionDirectory, currentFunction, currentVariableName, currentDim, currentR
+
+    superiorLimit = p[-1]
+    functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim] = {
+        'limit': superiorLimit
+    }
+    currentR = (superiorLimit + 1) * currentR
+    currentDim = currentDim + 1
+
+def p_array_calculate_m(p):
+    '''array_calculate_m : '''
+    global functionDirectory, currentFunction, currentVariableName, currentDim, currentR, currentType
+
+    dimensions = functionDirectory[currentFunction]['vars'][currentVariableName]['dim']
+
+    arrSize = currentR
+
+    functionDirectory[currentFunction]['vars'][currentVariableName]['virDir'] = memoryDirection.newVirtualDirection(currentType, currentFunction, programName, arrSize)
+
+    for i in range(0, len(dimensions)):
+        mdim = int(currentR / (dimensions[i + 1]['limit'] + 1))
+        functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][i + 1]['m'] = mdim
+        currentR = mdim
+
+    # Update function size
+    typeOrder = {'int':0, 'float':1, 'char':2}
+    index = typeOrder[currentType]
+    functionDirectory[currentFunction]['size'][index] = functionDirectory[currentFunction]['size'][index] + arrSize
+
 def p_vars_md_id(p):
-    '''vars_md_id   : LBRACKET INT RBRACKET vars_md_id
-                    | LBRACKET INT RBRACKET'''
-    pass
+    '''vars_md_id   : LBRACKET INT array_save_limit RBRACKET vars_md_id
+                    | LBRACKET INT array_save_limit RBRACKET array_calculate_m'''
+
+def p_array_init_dim(p):
+    '''array_init_dim : '''
+
+    global functionDirectory, currentFunction, currentType, currentVariableName, programName, currentDim, currentR
+    localVariableName = p[-1]
+    
+    if localVariableName in functionDirectory[currentFunction]['vars']:
+        # Throw Multiple declaration error
+        print("Variable " + localVariableName + " declared multiple times in the same scope")
+        exit()
+    else:
+        functionDirectory[currentFunction]['vars'][localVariableName] = {
+            'type': currentType,
+        }
+    
+    currentVariableName = localVariableName
+
+    currentDim = 1
+    currentR = 1
+
+    functionDirectory[currentFunction]['vars'][currentVariableName]['dim'] = {
+        currentDim: {}
+    }
+
 
 def p_vars_id_dec(p):
     '''vars_id_dec  : vars_id_dec COMMA vars_id_dec
                     | ID save_variable_name
-                    | ID save_variable_name vars_md_id'''
+                    | ID array_init_dim vars_md_id'''
 
 def p_save_variable_name(p):
     '''save_variable_name : '''
@@ -627,18 +686,19 @@ def p_save_variable_name(p):
     else:
         functionDirectory[currentFunction]['vars'][localVariableName] = {
             'type': currentType,
-            'virDir': memoryDirection.newVirtualDirection(currentType, currentFunction, programName)
+            'virDir': memoryDirection.newVirtualDirection(currentType, currentFunction, programName, 1)
         }
     
         # Update function size
         typeOrder = {'int':0, 'float':1, 'char':2}
         index = typeOrder[currentType]
         functionDirectory[currentFunction]['size'][index] = functionDirectory[currentFunction]['size'][index] + 1
+    
+    currentVariableName = localVariableName
 
 def p_vars_body(p):
     '''vars_body    : vars_body vars_body
                     | type vars_id_dec SEMI'''
-    pass
 
 def p_vars_dec(p):
     '''vars_dec     : VARS save_VARTable vars_body'''

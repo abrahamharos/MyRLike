@@ -4,22 +4,22 @@ VARS
     int arreglo[10][5][2], i, j, p;
     float valor;
 
+func int multiplication (int i, int j)
+{
+    i = ((i * j) + j) + j;
+    return (i * j);
+}
+
 func int fact (int j)
 VARS    int x;
         float y;
         char z;
 {
-    valor = i + 1;
+    valor = i + multiplication(1, 1);
     valor = i + 1.1;
     valor = i / 1.1 * 2;
     valor = 2.2 * (j + i) / 3;
     return (j);
-}
-
-func int multiplication (int i, int j)
-{
-    i = ((i * j) + j) + j;
-    return (i * j);
 }
 
 main(){

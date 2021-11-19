@@ -6,7 +6,13 @@ VARS
     char hola, io[2][2];
 
 main(){
+    arr[1] = 1;
+    i = 1;
+    j = 1;
+    p = 1;
+    arreglo[6][1][1] = 2;
     i = arreglo[arr[i+j * 3]][p][arr[arr[1]]];
+    write(i);
     valor = yu[1];
     hola = io[1][0];
     write("Introduce el valor de P: ");

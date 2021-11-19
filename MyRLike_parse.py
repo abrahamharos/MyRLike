@@ -4,7 +4,7 @@ import MyRLike_lex
 tokens = MyRLike_lex.tokens
 from ply import yacc
 import pprint
-from cuboSemantico import CS, checkValidOperators
+from cuboSemantico import checkValidOperators
 import MemoryDirection as MD
 import json
 
@@ -208,8 +208,15 @@ def p_array_quad_sum_d(p):
 
     aux2 = operandStack.pop()
     aux2Type = typeStack.pop()
-    aux1 = operandStack.pop()
-    aux1Type = typeStack.pop()
+    if (len(operandStack) > 0):
+        aux1 = operandStack.pop()
+        aux1Type = typeStack.pop()
+    else:
+        currentValue = 0
+        if (currentValue not in constantDirectory['int'].keys()):
+            constantDirectory['int'][currentValue] = memoryDirection.newConstVirtualDirection('int')
+        aux1 = constantDirectory['int'][currentValue]
+        aux1Type = 'int'
 
     resultType = checkValidOperators(aux1, aux1Type, aux2, aux2Type, '+')
 
@@ -334,7 +341,6 @@ def p_m_exp(p):
                     | t quad_generate PLUS quad_save_operator m_exp
                     | t quad_generate MINUS quad_save_operator m_exp'''
 
-# TODO
 def p_quad_save_operator(p):
     '''quad_save_operator : '''
     global operandStack, operatorStack, typeStack
@@ -433,7 +439,7 @@ def p_call_param(p):
 def p_function_verify_ERA(p):
     '''function_verify_ERA : '''
 
-    global functionDirectory, quadruples, quadCounter, parameterCounter, calledFunction
+    global functionDirectory, quadruples, quadCounter, parameterCounter, calledFunction, currentFunction
 
     calledFunction = p[-1]
 
@@ -451,10 +457,19 @@ def p_function_verify_ERA(p):
     # Start parameter counter
     parameterCounter = 0
 
+    calledFunctionType = functionDirectory[calledFunction]['type']
+
+    #  Save global variable with the name of the function for return values
+    if(currentType != 'void'):
+        functionDirectory[currentFunction]['vars'][calledFunction] = {
+            'type': calledFunctionType,
+            'virDir': memoryDirection.newVirtualDirection(calledFunctionType, currentFunction, programName, 1)
+        }
+
 def p_function_end_call(p):
     '''function_end_call : '''
 
-    global functionDirectory, calledFunction, parameterCounter, quadruples, quadCounter
+    global functionDirectory, calledFunction, parameterCounter, quadruples, quadCounter, currentFunction, operandStack, typeStack
 
     # Verify that all parameters were provided
     nParameters = len(functionDirectory[calledFunction]['parameters'])
@@ -468,6 +483,19 @@ def p_function_end_call(p):
     quadruple = ('GOSUB', '', calledFunction, initialDirection)
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
+
+    # Generate save result quadruple
+    result = functionDirectory[currentFunction]['vars'][calledFunction]['virDir']
+    resultType = functionDirectory[currentFunction]['vars'][calledFunction]['type']
+    newTemp = memoryDirection.newTempVirtualDirection(resultType)
+
+    operandStack.append(newTemp)
+    typeStack.append(resultType)
+
+    quadruple = ('=', result, '', newTemp)
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
 
 def p_call(p):
     '''call         : ID function_verify_ERA LPAREN call_param RPAREN function_end_call

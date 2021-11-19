@@ -1,12 +1,12 @@
 Program MyRlike;
 
 VARS
-    int i, j, p, x, arreglo[10][5][2];
+    int i, j, p, x, arreglo[10][5][2], arr[3];
     float valor, yu[3];
     char hola, io[2][2];
 
 main(){
-    i = arreglo[1][1][1];
+    i = arreglo[arr[i+j * 3]][p][arr[arr[1]]];
     valor = yu[1];
     hola = io[1][0];
     write("Introduce el valor de P: ");

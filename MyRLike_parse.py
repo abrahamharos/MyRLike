@@ -139,10 +139,6 @@ def p_assignment(p):
 def p_array_dim_stack_push(p):
     '''array_dim_stack_push : '''
     global functionDirectory, currentFunction, programName, operandStack, operatorStack, typeStack, currentVariableName, currentDim, dimensionStack
-
-    currentDim = 0
-    dimensionStack.append(currentVariableName)
-    operatorStack.append('(')
     
     currentVariable = p[-1]
 
@@ -151,18 +147,33 @@ def p_array_dim_stack_push(p):
     if not(currentVariable in functionDirectory[currentFunction]['vars'].keys()):
         if (currentVariable in functionDirectory[programName]['vars'].keys()):
             currentVariableName = currentVariable
+            currentDim = 0
+            dimensionStack.append([currentVariableName, currentDim])
+            operatorStack.append('(')
         else:
             print("Array \'" + currentVariable + "\' does not exist")
             exit()
     else:
         currentVariableName = currentVariable
+        currentDim = 0
+        dimensionStack.append([currentVariableName, currentDim])
+        operatorStack.append('(')
 
 def p_array_quad_verify(p):
     '''array_quad_verify : '''
-    global operandStack, quadruples, quadCounter, functionDirectory, currentFunction, currentDim, currentVariableName
-    currentDim = currentDim + 1
+    global operandStack, quadruples, quadCounter, functionDirectory, currentFunction, currentDim, currentVariableName, dimensionStack
+    [varName, nDim] = dimensionStack.pop()
+    currentDim = nDim + 1
+    currentVariableName = varName
+    dimensionStack.append([varName, currentDim])
 
     inferiorLimit = 0
+    nDimensions = len(functionDirectory[currentFunction]['vars'][currentVariableName]['dim'])
+    if (currentDim > nDimensions):
+        print('Error: Trying to access dimensions that does not exists')
+        print('the current array has ' + str(nDimensions) + " dimensions and you\' are trying to access " + str(currentDim))
+        exit()
+        
     superiorLimit = functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim]['limit'] - 1
 
     quadruple = ('verify', operandStack[-1], inferiorLimit, superiorLimit) # Pending quadruple
@@ -218,7 +229,7 @@ def p_array_quad_sum_d(p):
 def p_array_sum_base(p):
     '''array_sum_base :'''
 
-    global currentDim, functionDirectory, currentFunction, currentVariableName, operandStack, operatorStack, typeStack, quadCounter, quadruples
+    global currentDim, functionDirectory, currentFunction, currentVariableName, operandStack, operatorStack, typeStack, quadCounter, quadruples, dimensionStack
     
     # Verify that all dimensions were accessed.
     nDimensions = len(functionDirectory[currentFunction]['vars'][currentVariableName]['dim'])
@@ -245,6 +256,7 @@ def p_array_sum_base(p):
         print('Error: calculating exp inside array')
         exit()
     operatorStack.pop()
+    dimensionStack.pop()
 
 def p_md_variable(p):
     '''md_variable  : LBRACKET exp array_quad_verify RBRACKET array_quad_multiply array_quad_sum_d md_variable

@@ -36,6 +36,7 @@ memoryDirection = MD.virtualMemory()
 # Arrays
 currentDim = 0
 currentR = 0
+dimensionStack = []
 
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI save_main_ip body end_function
@@ -81,8 +82,8 @@ def p_save_program_data(p):
     memoryDirection.resetLocalAndTempCounters()
 
     # Init size of the function, each field indicates the # of variables of that type
-    # [# local ints, # local floats, # local chars, # temp ints, # temp floats, # temp chars ]
-    functionDirectory[currentFunction]['size'] = [0, 0, 0, 0, 0, 0]
+    # [# local ints, # local floats, # local chars, # temp ints, # temp floats, # temp chars,  # pointer ints, # pointer floats, # pointer chars]
+    functionDirectory[currentFunction]['size'] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
 def p_set_main_current_function(p):
@@ -135,14 +136,124 @@ def p_quad_generate_assignment(p):
 def p_assignment(p):
     '''assignment   : variable EQUALS quad_save_operator exp quad_generate_assignment'''
 
+def p_array_dim_stack_push(p):
+    '''array_dim_stack_push : '''
+    global functionDirectory, currentFunction, programName, operandStack, operatorStack, typeStack, currentVariableName, currentDim, dimensionStack
+
+    currentDim = 0
+    dimensionStack.append(currentVariableName)
+    operatorStack.append('(')
+    
+    currentVariable = p[-1]
+
+    # Check if currentVariable exist in the currentFunction Scope
+    # If not, check for the global one.
+    if not(currentVariable in functionDirectory[currentFunction]['vars'].keys()):
+        if (currentVariable in functionDirectory[programName]['vars'].keys()):
+            currentVariableName = currentVariable
+        else:
+            print("Array \'" + currentVariable + "\' does not exist")
+            exit()
+    else:
+        currentVariableName = currentVariable
+
+def p_array_quad_verify(p):
+    '''array_quad_verify : '''
+    global operandStack, quadruples, quadCounter, functionDirectory, currentFunction, currentDim, currentVariableName
+    currentDim = currentDim + 1
+
+    inferiorLimit = 0
+    superiorLimit = functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim]['limit'] - 1
+
+    quadruple = ('verify', operandStack[-1], inferiorLimit, superiorLimit) # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+def p_array_quad_multiply(p):
+    '''array_quad_multiply : '''
+
+    global operandStack, typeStack, quadruples, quadCounter, functionDirectory, currentFunction, currentVariableName, currentDim
+
+    mdim = functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim]['m']
+    
+    currentType = typeStack.pop()
+    if (currentType != 'int'):
+        print('Error: Type mismatch')
+        print('You can only access arrays with integer values')
+        exit()
+    temporal = memoryDirection.newTempVirtualDirection(currentType)
+
+    quadruple = ('*', operandStack.pop(), mdim, temporal) # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+    
+    operandStack.append(temporal)
+    typeStack.append(currentType)
+
+def p_array_quad_sum_d(p):
+    '''array_quad_sum_d :'''
+
+    global operandStack, typeStack, quadruples, quadCounter, functionDirectory, currentFunction
+
+    aux2 = operandStack.pop()
+    aux2Type = typeStack.pop()
+    aux1 = operandStack.pop()
+    aux1Type = typeStack.pop()
+
+    resultType = checkValidOperators(aux1, aux1Type, aux2, aux2Type, '+')
+
+    if (resultType != 'int'):
+        print('Error: Type mismatch')
+        print('You can only access arrays with integer values')
+        exit()
+    temporal = memoryDirection.newTempVirtualDirection(resultType)
+
+    quadruple = ('+', aux1, aux2, temporal) # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    operandStack.append(temporal)
+    typeStack.append(currentType)
+
+def p_array_sum_base(p):
+    '''array_sum_base :'''
+
+    global currentDim, functionDirectory, currentFunction, currentVariableName, operandStack, operatorStack, typeStack, quadCounter, quadruples
+    
+    # Verify that all dimensions were accessed.
+    nDimensions = len(functionDirectory[currentFunction]['vars'][currentVariableName]['dim'])
+    if (currentDim != nDimensions):
+        print('Error: Trying to access dimensions that does not exists')
+        print('the current array has ' + str(nDimensions) + " dimensions and you\' are trying to access " + str(currentDim))
+        exit()
+
+    aux1 = operandStack.pop()
+    aux1Type = typeStack.pop()
+    arrType = functionDirectory[currentFunction]['vars'][currentVariableName]['type']
+
+    baseAddress = functionDirectory[currentFunction]['vars'][currentVariableName]['virDir']
+    tempPointer = memoryDirection.newTempPointer(arrType)
+
+    quadruple = ('+', aux1, baseAddress, tempPointer) # Pending quadruple
+    quadruples.append(quadruple)
+    quadCounter = quadCounter + 1
+
+    operandStack.append(tempPointer) # Contains address
+    typeStack.append(arrType)
+    
+    if(operatorStack[-1] != '('):
+        print('Error: calculating exp inside array')
+        exit()
+    operatorStack.pop()
+
 def p_md_variable(p):
-    '''md_variable  : LBRACKET INT RBRACKET md_variable
-                    | LBRACKET INT RBRACKET'''
+    '''md_variable  : LBRACKET exp array_quad_verify RBRACKET array_quad_multiply array_quad_sum_d md_variable
+                    | LBRACKET exp array_quad_verify RBRACKET array_sum_base'''
     pass
 
 def p_quad_save_vars(p):
     '''quad_save_vars : '''
-    global functionDirectory, currentFunction, programName, operandStack, operatorStack, typeStack
+    global functionDirectory, currentFunction, programName, operandStack, operatorStack, typeStack, currentVariableName
     
     currentVariable = p[-1]
 
@@ -159,10 +270,9 @@ def p_quad_save_vars(p):
         operandStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['virDir'])
         typeStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['type'])
 
-# TODO: Save arrays in VARS directory
 def p_variable(p):
     '''variable     : ID quad_save_vars
-                    | ID md_variable'''
+                    | ID array_dim_stack_push md_variable'''
     pass
 
 def p_quad_generate(p):
@@ -757,6 +867,9 @@ def p_end_func(p):
     functionDirectory[currentFunction]['size'][3] = tempCounters[0]
     functionDirectory[currentFunction]['size'][4] = tempCounters[1]
     functionDirectory[currentFunction]['size'][5] = tempCounters[2]
+    functionDirectory[currentFunction]['size'][6] = tempCounters[3]
+    functionDirectory[currentFunction]['size'][7] = tempCounters[4]
+    functionDirectory[currentFunction]['size'][8] = tempCounters[5]
 
 def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
@@ -793,8 +906,8 @@ def p_save_function_data(p):
     functionDirectory[currentFunction]['initialDirection'] = quadCounter
 
     # Init size of the function, each field indicates the # of variables of that type
-    # [# local ints, # local floats, # local chars, # temp ints, # temp floats, # temp chars ]
-    functionDirectory[currentFunction]['size'] = [0, 0, 0, 0, 0, 0]
+    # [# local ints, # local floats, # local chars, # temp ints, # temp floats, # temp chars,  # pointer ints, # pointer floats, # pointer chars]
+    functionDirectory[currentFunction]['size'] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # Init parameter array.
     functionDirectory[currentFunction]['parameters'] = []

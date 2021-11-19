@@ -3,7 +3,7 @@ INITIAL_DIR = 3000
 
 class virtualMemory:
     def __init__(self):
-        initialDirections = [i for i in range(INITIAL_DIR ,INITIAL_DIR + MAX_SLOTS * 13, MAX_SLOTS)]
+        initialDirections = [i for i in range(INITIAL_DIR ,INITIAL_DIR + MAX_SLOTS * 16, MAX_SLOTS)]
         
         self.virtualMemoryDirectionMap = {
             'g_int': {
@@ -58,6 +58,18 @@ class virtualMemory:
                 'initialDirection': initialDirections[12],
                 'counter': 0
             },
+            'p_int' : {
+                'initialDirection': initialDirections[13],
+                'counter': 0
+            },
+            'p_float' : {
+                'initialDirection': initialDirections[14],
+                'counter': 0
+            },
+            'p_char' : {
+                'initialDirection': initialDirections[15],
+                'counter': 0
+            }
         }
 
         self.inverseVirtualMemoryDirectionMap = {
@@ -74,6 +86,9 @@ class virtualMemory:
             11: 'c_float',
             12: 'c_char',
             13: 'c_string',
+            14: 'p_int',
+            15: 'p_float',
+            16: 'p_char'
         }
 
     def newVirtualDirection(self, currentType, currentFunction, programName, arrSize):
@@ -125,11 +140,30 @@ class virtualMemory:
         self.virtualMemoryDirectionMap['t_float']['counter'] = 0
         self.virtualMemoryDirectionMap['t_char']['counter'] = 0
 
+        self.virtualMemoryDirectionMap['p_int']['counter'] = 0
+        self.virtualMemoryDirectionMap['p_float']['counter'] = 0
+        self.virtualMemoryDirectionMap['p_char']['counter'] = 0
+
     def getTempCounters(self):
         iCounter = self.virtualMemoryDirectionMap['t_int']['counter']
         fCounter = self.virtualMemoryDirectionMap['t_float']['counter']
-        cCounter = self.virtualMemoryDirectionMap['t_char']['counter'] = 0
+        cCounter = self.virtualMemoryDirectionMap['t_char']['counter']
+        ipCounter = self.virtualMemoryDirectionMap['p_int']['counter']
+        fpCounter = self.virtualMemoryDirectionMap['p_float']['counter']
+        cpCounter = self.virtualMemoryDirectionMap['p_char']['counter']
 
-        result = [iCounter, fCounter, cCounter]
+        result = [iCounter, fCounter, cCounter, ipCounter, fpCounter, cpCounter]
+
+        return result
+
+    def newTempPointer(self, currentType):
+        auxMemory = self.virtualMemoryDirectionMap['p_' + currentType]
+        result = auxMemory['initialDirection'] + auxMemory['counter']
+
+        if(auxMemory['counter'] > MAX_SLOTS - 1):
+            print('Error: Too many variables declared (max is ' + str(MAX_SLOTS) + ')')
+            exit()
+        
+        auxMemory['counter'] = auxMemory['counter'] + 1
 
         return result

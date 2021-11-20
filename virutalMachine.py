@@ -1,8 +1,13 @@
 import json
 import sys
 from typing import get_args
+
+from numpy.lib.polynomial import polyfit
 import MemoryDirection as MD
 import pprint
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
 
 MAX_STACK = 5000
 
@@ -307,13 +312,51 @@ def execute(IP, varTable):
             return
 
         # Array's code ['verify'] and pointer access
-
         if(operand0 == 'verify'):
             value = getValueFromMemoryAddress(varTable, operand1)
             if (value < operand2 or value > operand3):
                 print('Error: index out of bounds')
                 exit()
+
+        # Special functions (media, moda, varianza, regresionSimple, plotXY)
+        if (operand0 == 'media'):
+            numberList = [getValueFromMemoryAddress(varTable, operand2[0] + i) for i in range(0, operand2[1])]
+
+            res = getMemoryFromMemoryAddress(varTable, operand3)
+            assignTo(res, varTable, np.mean(numberList))
+            
+        if (operand0 == 'moda'):
+            numberList = [getValueFromMemoryAddress(varTable, operand2[0] + i) for i in range(0, operand2[1])]
+
+            res = getMemoryFromMemoryAddress(varTable, operand3)
+            mode = stats.mode(numberList)
+            assignTo(res, varTable, mode[0][0])
+
+            
+        if (operand0 == 'varianza'):
+            numberList = [getValueFromMemoryAddress(varTable, operand2[0] + i) for i in range(0, operand2[1])]
+
+            res = getMemoryFromMemoryAddress(varTable, operand3)
+            assignTo(res, varTable, np.var(numberList))
+
+        if(operand0 == 'regresionSimple'):
+            xList = np.array([getValueFromMemoryAddress(varTable, operand3[0] + i) for i in range(0, operand3[1])])
+            yList = np.array([getValueFromMemoryAddress(varTable, operand2[0] + i) for i in range(0, operand2[1])])
+
+            m, b = polyfit(xList, yList, 1)
+
+            plt.plot(xList, yList, 'o')
+            plt.plot(xList, m * xList + b)
+            plt.show()
         
+        if(operand0 == 'plotXY'):
+            xList = np.array([getValueFromMemoryAddress(varTable, operand3[0] + i) for i in range(0, operand3[1])])
+            yList = np.array([getValueFromMemoryAddress(varTable, operand2[0] + i) for i in range(0, operand2[1])])
+
+            plt.plot(xList, yList, 'o')
+            plt.show()
+
+
         IP = IP + 1
 
 def main(filename):

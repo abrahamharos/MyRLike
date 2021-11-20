@@ -33,6 +33,9 @@ tokens = [
 
     # Declaration (Program, VARS, int, float, main, func, void, return)
     'PROGRAM', 'VARS', 'TYPEINT', 'TYPEFLOAT', 'TYPECHAR', 'MAIN', 'FUNC', 'VOID', 'RETURN',
+
+    # Special Functions
+    'MEDIA', 'MODA', 'VARIANZA', 'REGRESIONSIMPLE', 'PLOTXY',
 ]
 
 reserverd = {
@@ -53,6 +56,11 @@ reserverd = {
     'func':     'FUNC',
     'void':     'VOID',
     'return':   'RETURN',
+    'media':    'MEDIA',
+    'moda':     'MODA',
+    'varianza': 'VARIANZA',
+    'regresionSimple': 'REGRESIONSIMPLE',
+    'plotXY':   'PLOTXY',
 }
 
 # Completely ignored characters (whitespace, tab and new line)

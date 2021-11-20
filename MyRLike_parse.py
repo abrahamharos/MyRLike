@@ -38,6 +38,10 @@ currentDim = 0
 currentR = 0
 dimensionStack = []
 
+# Special functions
+currentSpecial = ''
+specialParamStack = []
+
 def p_program(p):
     '''program      : PROGRAM ID save_program_data SEMI save_main_ip body end_function
                     | PROGRAM ID save_program_data SEMI vars_dec save_main_ip body end_function
@@ -288,12 +292,14 @@ def p_quad_save_vars(p):
         if (currentVariable in functionDirectory[programName]['vars'].keys()):
             operandStack.append(functionDirectory[programName]['vars'][currentVariable]['virDir'])
             typeStack.append(functionDirectory[programName]['vars'][currentVariable]['type'])
+            currentVariableName = currentVariable
         else:
             print("Variable \'" + currentVariable + "\' does not exist")
             exit()
     else:
         operandStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['virDir'])
         typeStack.append(functionDirectory[currentFunction]['vars'][currentVariable]['type'])
+        currentVariableName = currentVariable
 
 def p_variable(p):
     '''variable     : ID quad_save_vars
@@ -400,17 +406,9 @@ def p_quad_close_parenthesis(p):
     if (currentOperator == '('):
         operatorStack.pop()
 
-def p_quad_solve_call_end(p):
-    '''quad_solve_call_end :'''
-    global operatorStack
-    
-    currentOperator = operatorStack[-1]
-    if (currentOperator == '{'):
-        operatorStack.pop()
-
 def p_f(p):
     '''f            : LPAREN quad_save_operator exp RPAREN quad_close_parenthesis
-                    | call quad_solve_call_end
+                    | call
                     | variable
                     | INT quad_save_int
                     | FLOAT quad_save_float
@@ -488,7 +486,7 @@ def p_function_verify_ERA(p):
 def p_function_end_call(p):
     '''function_end_call : '''
 
-    global functionDirectory, calledFunction, parameterCounter, quadruples, quadCounter, currentFunction, operandStack, typeStack
+    global functionDirectory, calledFunction, parameterCounter, quadruples, quadCounter, currentFunction, operandStack, typeStack, operatorStack
 
     # Verify that all parameters were provided
     nParameters = len(functionDirectory[calledFunction]['parameters'])
@@ -515,11 +513,91 @@ def p_function_end_call(p):
         quadruple = ('=', result, '', newTemp)
         quadruples.append(quadruple)
         quadCounter = quadCounter + 1
+    
+    currentOperator = operatorStack[-1]
+    if (currentOperator == '{'):
+        operatorStack.pop()
 
+def p_special_save_id(p):
+    '''special_save_id : '''
+
+    global currentSpecial
+
+    currentSpecial = p[-1]
+
+def p_special_quad_array(p):
+    '''special_quad_array : '''
+
+    global currentVariableName, functionDirectory, currentFunction, programName, specialParamStack
+
+    if not(currentVariableName in functionDirectory[currentFunction]['vars'].keys()):
+        if (currentVariableName in functionDirectory[programName]['vars'].keys()):
+            if('dim' in functionDirectory[programName]['vars'][currentVariableName].keys()):
+                arrType = functionDirectory[programName]['vars'][currentVariableName]['type']
+            else:
+                print("Variable \'" + currentVariableName + "\' is not an ARRAY")
+                exit()
+        else:
+            print("Variable \'" + currentVariableName + "\' is not an ARRAY")
+            exit()
+    else:
+        if('dim' in functionDirectory[currentFunction]['vars'][currentVariableName].keys()):
+            arrType = functionDirectory[currentFunction]['vars'][currentVariableName]['type']
+        else:
+                print("Variable \'" + currentVariableName + "\' is not an ARRAY")
+                exit()
+    
+    if(arrType not in ['float', 'int']):
+        print("Variable \'" + currentVariableName + "\' is not a FLOAT or INT ARRAY")
+        exit()
+    
+    if (len(functionDirectory[programName]['vars'][currentVariableName]['dim']) > 1):
+        print("Variable \'" + currentVariableName + "\' is not a 1-dimensional ARRAY")
+        exit()
+
+    arrSize = functionDirectory[programName]['vars'][currentVariableName]['dim'][1]['limit']
+    baseAddress = functionDirectory[programName]['vars'][currentVariableName]['virDir']
+
+    specialParamStack.append([baseAddress, arrSize])
+
+def p_special_end(p):
+    '''special_end : '''
+    global currentSpecial, specialParamStack, quadCounter, quadruples, operandStack, typeStack
+
+    if (currentSpecial in ['regresionSimple', 'plotXY']):
+        param1 = specialParamStack.pop()
+        param2 = specialParamStack.pop()
+
+        if (param1[1] != param2[1]):
+            print("parameters for \'" + currentSpecial + "\' must be same size arrays")
+            exit()
+
+        quadruple = (currentSpecial, '', param1, param2)
+        quadruples.append(quadruple)
+        quadCounter = quadCounter + 1
+    else:
+        param1 = specialParamStack.pop()
+        
+        saveResult = memoryDirection.newTempVirtualDirection('float')
+        operandStack.append(saveResult)
+        typeStack.append('float')
+
+        quadruple = (currentSpecial, '', param1, saveResult)
+        quadruples.append(quadruple)
+        quadCounter = quadCounter + 1
+
+
+def p_call_special_functions(p):
+    '''call_special_functions   :   MEDIA special_save_id LPAREN variable special_quad_array RPAREN special_end
+                                |   MODA special_save_id LPAREN variable special_quad_array RPAREN special_end
+                                |   VARIANZA special_save_id LPAREN variable special_quad_array RPAREN special_end
+                                |   REGRESIONSIMPLE special_save_id LPAREN variable special_quad_array COMMA variable special_quad_array RPAREN special_end
+                                |   PLOTXY special_save_id LPAREN variable special_quad_array COMMA variable special_quad_array RPAREN special_end'''
 
 def p_call(p):
     '''call         : ID function_verify_ERA LPAREN call_param RPAREN function_end_call
-                    | ID function_verify_ERA LPAREN RPAREN function_end_call'''
+                    | ID function_verify_ERA LPAREN RPAREN function_end_call
+                    | call_special_functions'''
     pass
 
 def p_quad_generate_read(p):

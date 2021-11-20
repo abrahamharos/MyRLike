@@ -250,13 +250,16 @@ def p_array_sum_base(p):
     arrType = functionDirectory[currentFunction]['vars'][currentVariableName]['type']
 
     baseAddress = functionDirectory[currentFunction]['vars'][currentVariableName]['virDir']
+    if (baseAddress not in constantDirectory['int'].keys()):
+        constantDirectory['int'][baseAddress] = memoryDirection.newConstVirtualDirection('int')
+    baseAddressDirection = constantDirectory['int'][baseAddress]
     tempPointer = memoryDirection.newTempPointer(arrType)
 
-    quadruple = ('+', aux1, baseAddress, tempPointer) # Pending quadruple
+    quadruple = ('+', aux1, baseAddressDirection, tempPointer) # Pending quadruple
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
 
-    operandStack.append(tempPointer) # Contains address
+    operandStack.append([tempPointer]) # Contains address
     typeStack.append(arrType)
     
     if(operatorStack[-1] != '('):

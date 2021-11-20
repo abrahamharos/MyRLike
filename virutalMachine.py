@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import get_args
 import MemoryDirection as MD
 import pprint
 
@@ -63,8 +64,14 @@ def mountMemory(functionName):
 
     return currVarTable
 
+def isPointer(operand):
+    return isinstance(operand, list)
+
 def getValueFromMemoryAddress(currVarTable, operand):
     global constantDirectory, globalVarTable
+
+    if (isPointer(operand)):
+        return getValueFromMemoryAddress(currVarTable, getValueFromMemoryAddress(currVarTable, operand[0]))
 
     opType = operand // MD.MAX_SLOTS
     opPosition = operand % MD.MAX_SLOTS
@@ -89,22 +96,27 @@ def getValueFromMemoryAddress(currVarTable, operand):
 
     return result
 
-def getMemoryFromMemoryAddress(operand):
-    opType = operand // MD.MAX_SLOTS
-    opPosition = operand % MD.MAX_SLOTS
+def getMemoryFromMemoryAddress(currVarTable, operand):
+    if (isPointer(operand)):
+        result = getMemoryFromMemoryAddress(currVarTable, getValueFromMemoryAddress(currVarTable, operand[0]))
+        return result
+    else:
+        opType = operand // MD.MAX_SLOTS
+        opPosition = operand % MD.MAX_SLOTS
 
-    scope = memoryDirection.inverseVirtualMemoryDirectionMap[opType][0]
-    operandType = memoryDirection.inverseVirtualMemoryDirectionMap[opType][2:]
+        scope = memoryDirection.inverseVirtualMemoryDirectionMap[opType][0]
+        operandType = memoryDirection.inverseVirtualMemoryDirectionMap[opType][2:]
 
-    return [scope, operandType, opPosition]
+        return [scope, operandType, opPosition]
 
 def assignTo(memoryDirection, varTable, result):
     global globalVarTable
-
+    
     if (memoryDirection[0] == 'g'):
         globalVarTable[memoryDirection[0]][memoryDirection[1]][memoryDirection[2]] = result
     else:
         varTable[memoryDirection[0]][memoryDirection[1]][memoryDirection[2]] = result
+        
 
 def execute(IP, varTable):
     global stackCounter
@@ -126,7 +138,7 @@ def execute(IP, varTable):
         if(operand0 in operacionesAritmeticas):
             op1 = getValueFromMemoryAddress(varTable, operand1)
             op2 = getValueFromMemoryAddress(varTable, operand2)
-            res = getMemoryFromMemoryAddress(operand3)
+            res = getMemoryFromMemoryAddress(varTable, operand3)
 
             if (operand0 == '+'):
                 result = op1 + op2
@@ -146,7 +158,7 @@ def execute(IP, varTable):
         if (operand0 in operacionesLogicas):
             op1 = getValueFromMemoryAddress(varTable, operand1)
             op2 = getValueFromMemoryAddress(varTable, operand2)
-            res = getMemoryFromMemoryAddress(operand3)
+            res = getMemoryFromMemoryAddress(varTable, operand3)
 
             if (operand0 == '<'):
                 if (op1 < op2):
@@ -201,13 +213,13 @@ def execute(IP, varTable):
         # Asignaciones =
         if (operand0 == '='):
             op1 = getValueFromMemoryAddress(varTable, operand1)
-            res = getMemoryFromMemoryAddress(operand3)
+            res = getMemoryFromMemoryAddress(varTable, operand3)
             result = op1
             assignTo(res, varTable, result)
 
         # Operaciones READ, WRITE
         if (operand0 == 'READ'):
-            res = getMemoryFromMemoryAddress(operand3)
+            res = getMemoryFromMemoryAddress(varTable, operand3)
             tempInput = input()
             if (res[1] == 'int'):
                 try:
@@ -262,7 +274,7 @@ def execute(IP, varTable):
         if (operand0 == 'PARAMETER'):
             # Assign parameter values to the current function memory
             res = getValueFromMemoryAddress(varTable, operand2)
-            mem = getMemoryFromMemoryAddress(operand2)
+            mem = getMemoryFromMemoryAddress(varTable, operand2)
 
             calledFunctionVarTable['l'][mem[1]][operand3] = res
 
@@ -279,14 +291,14 @@ def execute(IP, varTable):
             if (functionDirectory[calledFunction]['type'] != 'void'):
                 auxNextQuad = quadruples[IP + 1]
                 if(auxNextQuad[0] == '='):
-                    auxMemory = getMemoryFromMemoryAddress(auxNextQuad[1])
+                    auxMemory = getMemoryFromMemoryAddress(varTable, auxNextQuad[1])
                     assignTo(auxMemory, varTable, result)
 
                     del calledFunctionVarTable
 
         if (operand0 == 'RETURN'):
             result = getValueFromMemoryAddress(varTable, operand3)
-            res = getMemoryFromMemoryAddress(operand3)
+            res = getMemoryFromMemoryAddress(varTable, operand3)
             stackCounter = stackCounter - 1
             return result
 
@@ -294,6 +306,13 @@ def execute(IP, varTable):
             stackCounter = stackCounter - 1
             return
 
+        # Array's code ['verify'] and pointer access
+
+        if(operand0 == 'verify'):
+            value = getValueFromMemoryAddress(varTable, operand1)
+            if (value < operand2 or value > operand3):
+                print('Error: index out of bounds')
+                exit()
         
         IP = IP + 1
 
@@ -305,7 +324,6 @@ def main(filename):
 
     currVarTable = mountMemory(programName)
     IP = 0
-    pprint.pprint(functionDirectory[programName])
     execute(IP, currVarTable)
 
 

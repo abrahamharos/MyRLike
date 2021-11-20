@@ -1,0 +1,11 @@
+Program MyRlike;
+
+VARS
+    int i[3], j[2][2], k[2][2][2];
+
+main(){
+    write("i[0]: ");
+    read(i[0]);
+    
+    write(i[0]);
+}

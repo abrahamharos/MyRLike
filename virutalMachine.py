@@ -3,13 +3,15 @@ import sys
 import MemoryDirection as MD
 import pprint
 
+MAX_STACK = 5000
+
 functionDirectory = {}
 constantDirectory = {}
 quadruples = {}
 programName = ''
 globalVarTable = {}
 memoryDirection = MD.virtualMemory()
-executionStack = []
+stackCounter = 0
 debug = True
 
 def loadData(filename):
@@ -105,7 +107,7 @@ def assignTo(memoryDirection, varTable, result):
         varTable[memoryDirection[0]][memoryDirection[1]][memoryDirection[2]] = result
 
 def execute(IP, varTable):
-    global executionStack
+    global stackCounter
 
     calledFunction = ''
     calledFunctionVarTable = {}
@@ -264,6 +266,11 @@ def execute(IP, varTable):
 
         if (operand0 == 'GOSUB'):
             calledFunction = operand2
+            stackCounter = stackCounter + 1
+            if (stackCounter >= MAX_STACK):
+                print('Error: Stack Overflow')
+                print('Maximum # calls allowed: ' + str(MAX_STACK))
+                exit()
             result = execute(operand3, calledFunctionVarTable)
             
             # save returned value from the function on global var table
@@ -278,10 +285,11 @@ def execute(IP, varTable):
         if (operand0 == 'RETURN'):
             result = getValueFromMemoryAddress(varTable, operand3)
             res = getMemoryFromMemoryAddress(operand3)
-
+            stackCounter = stackCounter - 1
             return result
 
         if(operand0 == 'ENDFUNC'):
+            stackCounter = stackCounter - 1
             return
 
         

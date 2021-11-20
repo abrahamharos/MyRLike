@@ -22,6 +22,13 @@ func void write2 (char c) {
     write(c);
 }
 
+func int fib (int a) {
+    if (a <= 1){
+        return(a);
+    }
+    return(fib(a - 1) + fib(a - 2));
+}
+
 main(){
     write("Introduce el valor de P: ");
     read(p);
@@ -39,7 +46,10 @@ main(){
     write2('a');
 
     write("FACTORIAL ");
-    write(fact(4));
+    write(fact(5));
+
+    write("FIB ");
+    write(fib(10));
 
     write("Salto 2");
     write("Introduce i para while loop");

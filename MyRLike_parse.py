@@ -186,7 +186,10 @@ def p_array_quad_multiply(p):
     global operandStack, typeStack, quadruples, quadCounter, functionDirectory, currentFunction, currentVariableName, currentDim
 
     mdim = functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim]['m']
-    
+    if (mdim not in constantDirectory['int'].keys()):
+        constantDirectory['int'][mdim] = memoryDirection.newConstVirtualDirection('int')
+    mdimDirection = constantDirectory['int'][mdim]
+
     currentType = typeStack.pop()
     if (currentType != 'int'):
         print('Error: Type mismatch')
@@ -194,7 +197,7 @@ def p_array_quad_multiply(p):
         exit()
     temporal = memoryDirection.newTempVirtualDirection(currentType)
 
-    quadruple = ('*', operandStack.pop(), mdim, temporal) # Pending quadruple
+    quadruple = ('*', operandStack.pop(), mdimDirection, temporal) # Pending quadruple
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
     

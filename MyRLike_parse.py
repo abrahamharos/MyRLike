@@ -172,13 +172,22 @@ def p_array_quad_verify(p):
     dimensionStack.append([varName, currentDim])
 
     inferiorLimit = 0
-    nDimensions = len(functionDirectory[currentFunction]['vars'][currentVariableName]['dim'])
+    
+    if not(currentVariableName in functionDirectory[currentFunction]['vars'].keys()):
+        if (currentVariableName in functionDirectory[programName]['vars'].keys()):
+            nDimensions = len(functionDirectory[programName]['vars'][currentVariableName]['dim'])
+            superiorLimit = functionDirectory[programName]['vars'][currentVariableName]['dim'][currentDim]['limit'] - 1
+        else:
+            print("Array \'" + currentVariableName + "\' does not exist")
+            exit()
+    else:
+        nDimensions = len(functionDirectory[currentFunction]['vars'][currentVariableName]['dim'])
+        superiorLimit = functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim]['limit'] - 1
+
     if (currentDim > nDimensions):
         print('Error: Trying to access dimensions that does not exists')
         print('the current array has ' + str(nDimensions) + " dimensions and you\' are trying to access " + str(currentDim))
         exit()
-        
-    superiorLimit = functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim]['limit'] - 1
 
     quadruple = ('verify', operandStack[-1], inferiorLimit, superiorLimit) # Pending quadruple
     quadruples.append(quadruple)
@@ -246,7 +255,20 @@ def p_array_sum_base(p):
     global currentDim, functionDirectory, currentFunction, currentVariableName, operandStack, operatorStack, typeStack, quadCounter, quadruples, dimensionStack
     
     # Verify that all dimensions were accessed.
-    nDimensions = len(functionDirectory[currentFunction]['vars'][currentVariableName]['dim'])
+
+    if not(currentVariableName in functionDirectory[currentFunction]['vars'].keys()):
+        if (currentVariableName in functionDirectory[programName]['vars'].keys()):
+            nDimensions = len(functionDirectory[programName]['vars'][currentVariableName]['dim'])
+            arrType = functionDirectory[programName]['vars'][currentVariableName]['type']
+            baseAddress = functionDirectory[programName]['vars'][currentVariableName]['virDir']
+        else:
+            print("Array \'" + currentVariableName + "\' does not exist")
+            exit()
+    else:
+        nDimensions = len(functionDirectory[currentFunction]['vars'][currentVariableName]['dim'])
+        arrType = functionDirectory[currentFunction]['vars'][currentVariableName]['type']
+        baseAddress = functionDirectory[currentFunction]['vars'][currentVariableName]['virDir']
+
     if (currentDim != nDimensions):
         print('Error: Trying to access dimensions that does not exists')
         print('the current array has ' + str(nDimensions) + " dimensions and you\' are trying to access " + str(currentDim))
@@ -254,9 +276,7 @@ def p_array_sum_base(p):
 
     aux1 = operandStack.pop()
     aux1Type = typeStack.pop()
-    arrType = functionDirectory[currentFunction]['vars'][currentVariableName]['type']
 
-    baseAddress = functionDirectory[currentFunction]['vars'][currentVariableName]['virDir']
     if (baseAddress not in constantDirectory['int'].keys()):
         constantDirectory['int'][baseAddress] = memoryDirection.newConstVirtualDirection('int')
     baseAddressDirection = constantDirectory['int'][baseAddress]
@@ -533,7 +553,7 @@ def p_special_quad_array(p):
     if not(currentVariableName in functionDirectory[currentFunction]['vars'].keys()):
         if (currentVariableName in functionDirectory[programName]['vars'].keys()):
             if('dim' in functionDirectory[programName]['vars'][currentVariableName].keys()):
-                arrType = functionDirectory[programName]['vars'][currentVariableName]['type']
+                arr = functionDirectory[programName]['vars'][currentVariableName]
             else:
                 print("Variable \'" + currentVariableName + "\' is not an ARRAY")
                 exit()
@@ -542,21 +562,24 @@ def p_special_quad_array(p):
             exit()
     else:
         if('dim' in functionDirectory[currentFunction]['vars'][currentVariableName].keys()):
-            arrType = functionDirectory[currentFunction]['vars'][currentVariableName]['type']
+            arr = functionDirectory[currentFunction]['vars'][currentVariableName]
         else:
                 print("Variable \'" + currentVariableName + "\' is not an ARRAY")
                 exit()
     
+    arrType = arr['type']
+    arrDim = len(arr['dim'])
+    arrSize = arr['dim'][1]['limit']
+    baseAddress = arr['virDir']
+
     if(arrType not in ['float', 'int']):
         print("Variable \'" + currentVariableName + "\' is not a FLOAT or INT ARRAY")
         exit()
     
-    if (len(functionDirectory[programName]['vars'][currentVariableName]['dim']) > 1):
+    if (arrDim > 1):
         print("Variable \'" + currentVariableName + "\' is not a 1-dimensional ARRAY")
         exit()
 
-    arrSize = functionDirectory[programName]['vars'][currentVariableName]['dim'][1]['limit']
-    baseAddress = functionDirectory[programName]['vars'][currentVariableName]['virDir']
 
     specialParamStack.append([baseAddress, arrSize])
 

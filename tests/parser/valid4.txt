@@ -1,9 +1,9 @@
 Program MyRlike;
 
 VARS
-    int i, j, p, x, arreglo[10][5][2], arr[3];
-    float valor, yu[3];
-    char hola, io[2][2];
+    int i, j, p, x;
+    float valor;
+    char hola;
 
 func int multiplication (int i, int j)
 {
@@ -13,22 +13,16 @@ func int multiplication (int i, int j)
 func int fact (int j)
 {
     if (j == 1) {
-        return 1;
+        return(multiplication(1,1));
     }
     return (j * fact(j - 1));
 }
 
+func void write2 (char c) {
+    write(c);
+}
+
 main(){
-    arr[1] = 1;
-    i = 1;
-    j = 1;
-    p = 1;
-    arreglo[6][1][1] = 2;
-    i = arreglo[arr[i+j * 3]][p][arr[arr[1]]];
-    j = arr[0] * arr[1];
-    write(i);
-    valor = yu[1];
-    hola = io[1][0];
     write("Introduce el valor de P: ");
     read(p);
     if (p > 1) {
@@ -37,6 +31,15 @@ main(){
         write("Vuelve a introducir el valor de P: ");
         read(p);
     }
+
+    write("MULTIPLICATION: ");
+    write(multiplication(2, 3));
+
+    write("WRITE2: ");
+    write2('a');
+
+    write("FACTORIAL ");
+    write(fact(4));
 
     write("Salto 2");
     write("Introduce i para while loop");

@@ -3,7 +3,7 @@ INITIAL_DIR = 3000
 
 class virtualMemory:
     def __init__(self):
-        initialDirections = [i for i in range(INITIAL_DIR ,INITIAL_DIR + MAX_SLOTS * 16, MAX_SLOTS)]
+        initialDirections = [i for i in range(INITIAL_DIR ,INITIAL_DIR + MAX_SLOTS * 17, MAX_SLOTS)]
         
         self.virtualMemoryDirectionMap = {
             'g_int': {
@@ -69,6 +69,10 @@ class virtualMemory:
             'p_char' : {
                 'initialDirection': initialDirections[15],
                 'counter': 0
+            },
+            'g_void' : {
+                'initialDirection': initialDirections[16],
+                'counter': 0
             }
         }
 
@@ -88,7 +92,8 @@ class virtualMemory:
             13: 'c_string',
             14: 'p_int',
             15: 'p_float',
-            16: 'p_char'
+            16: 'p_char',
+            17: 'g_void'
         }
 
     def newVirtualDirection(self, currentType, currentFunction, programName, arrSize):

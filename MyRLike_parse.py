@@ -394,10 +394,18 @@ def p_quad_close_parenthesis(p):
     if (currentOperator == '('):
         operatorStack.pop()
 
+def p_quad_solve_call_end(p):
+    '''quad_solve_call_end :'''
+    global operatorStack
+    
+    currentOperator = operatorStack[-1]
+    if (currentOperator == '{'):
+        operatorStack.pop()
+
 def p_f(p):
     '''f            : LPAREN quad_save_operator exp RPAREN quad_close_parenthesis
+                    | call quad_solve_call_end
                     | variable
-                    | call
                     | INT quad_save_int
                     | FLOAT quad_save_float
                     | CHAR quad_save_char'''
@@ -441,6 +449,10 @@ def p_function_verify_ERA(p):
 
     global functionDirectory, quadruples, quadCounter, parameterCounter, calledFunction, currentFunction
 
+    # Fake bottom to solve calls before variables
+    currentOperator = '{'
+    operatorStack.append(currentOperator)
+
     calledFunction = p[-1]
 
     # verify that function exists
@@ -449,8 +461,7 @@ def p_function_verify_ERA(p):
         exit()
     
     # generate ERA action
-    functionSize = functionDirectory[calledFunction]['size']
-    quadruple = ('ERA', '', '', functionSize)
+    quadruple = ('ERA', '', '', calledFunction)
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
 
@@ -461,10 +472,12 @@ def p_function_verify_ERA(p):
 
     #  Save global variable with the name of the function for return values
     if(currentType != 'void'):
-        functionDirectory[currentFunction]['vars'][calledFunction] = {
-            'type': calledFunctionType,
-            'virDir': memoryDirection.newVirtualDirection(calledFunctionType, currentFunction, programName, 1)
-        }
+        globalVarTable = functionDirectory[programName]['vars']
+        if (calledFunction not in globalVarTable.keys()):
+            functionDirectory[programName]['vars'][calledFunction] = {
+                'type': calledFunctionType,
+                'virDir': memoryDirection.newVirtualDirection(calledFunctionType, programName, programName, 1)
+            }
 
 def p_function_end_call(p):
     '''function_end_call : '''
@@ -485,16 +498,17 @@ def p_function_end_call(p):
     quadCounter = quadCounter + 1
 
     # Generate save result quadruple
-    result = functionDirectory[currentFunction]['vars'][calledFunction]['virDir']
-    resultType = functionDirectory[currentFunction]['vars'][calledFunction]['type']
-    newTemp = memoryDirection.newTempVirtualDirection(resultType)
+    if (functionDirectory[calledFunction]['type'] != 'void'):
+        result = functionDirectory[programName]['vars'][calledFunction]['virDir']
+        resultType = functionDirectory[programName]['vars'][calledFunction]['type']
+        newTemp = memoryDirection.newTempVirtualDirection(resultType)
 
-    operandStack.append(newTemp)
-    typeStack.append(resultType)
+        operandStack.append(newTemp)
+        typeStack.append(resultType)
 
-    quadruple = ('=', result, '', newTemp)
-    quadruples.append(quadruple)
-    quadCounter = quadCounter + 1
+        quadruple = ('=', result, '', newTemp)
+        quadruples.append(quadruple)
+        quadCounter = quadCounter + 1
 
 
 def p_call(p):
@@ -535,6 +549,7 @@ def p_write_param(p):
                     | STRING quad_insert_string quad_generate_write'''
     pass
 
+# TODO: prevent write and read of VOID functions
 def p_quad_generate_write(p):
     '''quad_generate_write : '''
 
@@ -951,6 +966,12 @@ def p_save_function_data(p):
 
     # Init parameter array.
     functionDirectory[currentFunction]['parameters'] = []
+
+    # Add 1 to the size of global to save function return result
+    if ( currentType != 'void'):
+        typeOrder = {'int':0, 'float':1, 'char':2}
+        index = typeOrder[currentType]
+        functionDirectory[programName]['size'][index] = functionDirectory[programName]['size'][index] + 1
 
 def p_quad_generate_return(p):
     '''quad_generate_return : '''

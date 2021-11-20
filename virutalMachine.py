@@ -237,9 +237,11 @@ def execute(IP, varTable):
 
         if (operand0 == 'WRITE'):
             # This allows to print Null value (for debugging)
-            # TODO: for strings trim the "" 
             res = getValueFromMemoryAddress(varTable, operand3)
-            print(res)
+            if (isinstance(res, str)):
+                print(res[1:len(res) - 1])
+            else:
+                print(res)
 
         # Saltos goto, gotof
         if (operand0 == 'goto'):

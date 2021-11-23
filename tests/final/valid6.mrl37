@@ -1,8 +1,12 @@
+% testing comment %
 Program MyRlike;
 
+% testing comment %
 VARS
     int arreglo[5], x , arr2[20], arr3[20], counter;
     float xd;
+
+% Testing comment %
 
 func int fib (int a) {
     if (a <= 1){
@@ -10,6 +14,8 @@ func int fib (int a) {
     }
     return(fib(a - 1) + fib(a - 2));
 }
+
+% Testing comment %
 
 func void testSpecials (int x, int y) 
 VARS int arr5[20], arr6[20], counter;
@@ -31,6 +37,7 @@ VARS int arr5[20], arr6[20], counter;
 }
 
 main(){
+    % Testing comment %
     for x = 0 to 5 do {
         arreglo[x] = x * 2;
     }
@@ -67,3 +74,5 @@ main(){
 
     testSpecials(1, 2);
 }
+
+% Testing comment %

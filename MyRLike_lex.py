@@ -36,6 +36,9 @@ tokens = [
 
     # Special Functions
     'MEDIA', 'MODA', 'VARIANZA', 'REGRESIONSIMPLE', 'PLOTXY',
+
+    # Comment
+    'COMMENT',
 ]
 
 reserverd = {
@@ -98,6 +101,9 @@ t_CHAR = r'\'([A-Za-z]|[0-9])\''
 
 # String literal
 t_STRING = r'\"([^\\\n]|(\\.))*?\"'
+
+# comment literal
+t_COMMENT = r'\%([^\\\n]|(\\.))*?\%'
 
 # Literals
 # Identifiers

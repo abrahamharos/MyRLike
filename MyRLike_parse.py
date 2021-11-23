@@ -44,9 +44,9 @@ currentSpecial = ''
 specialParamStack = []
 
 def p_program(p):
-    '''program      : PROGRAM ID save_program_data SEMI save_main_ip body end_function
-                    | PROGRAM ID save_program_data SEMI vars_dec save_main_ip body end_function
-                    | PROGRAM ID save_program_data SEMI vars_dec func_dec save_main_ip body end_function'''
+    '''program      : comments PROGRAM ID save_program_data SEMI save_main_ip body end_function comments
+                    | comments PROGRAM ID save_program_data SEMI vars_dec save_main_ip body end_function comments
+                    | comments PROGRAM ID save_program_data SEMI vars_dec func_dec save_main_ip body end_function comments'''
     
     global functionDirectory
     
@@ -105,6 +105,16 @@ def p_block(p):
     '''block        : LBRACE statement RBRACE'''
     pass
 
+def p_empty(p):
+    '''empty : '''
+    pass
+
+def p_comments(p):
+    '''comments : comments comments
+                | COMMENT
+                | empty'''
+    pass
+
 def p_statement(p):
     '''statement    : statement statement
                     | assignment SEMI
@@ -114,7 +124,8 @@ def p_statement(p):
                     | write SEMI
                     | condition
                     | while_loop
-                    | for_loop'''
+                    | for_loop
+                    | COMMENT'''
     pass
 
 def p_quad_generate_assignment(p):
@@ -980,7 +991,7 @@ def p_vars_body(p):
                     | type vars_id_dec SEMI'''
 
 def p_vars_dec(p):
-    '''vars_dec     : VARS save_VARTable vars_body'''
+    '''vars_dec     : comments VARS save_VARTable vars_body'''
 
 def p_save_VARTable(p):
     '''save_VARTable : '''
@@ -1042,10 +1053,10 @@ def p_end_func(p):
 
 def p_func_dec(p):
     '''func_dec     :   func_dec func_dec
-                    |   FUNC func_type ID save_function_data LPAREN RPAREN vars_dec block end_function
-                    |   FUNC func_type ID save_function_data LPAREN func_params RPAREN vars_dec block end_function
-                    |   FUNC func_type ID save_function_data LPAREN RPAREN block end_function
-                    |   FUNC func_type ID save_function_data LPAREN func_params RPAREN block end_function'''
+                    |   comments FUNC func_type ID save_function_data LPAREN RPAREN vars_dec block end_function
+                    |   comments FUNC func_type ID save_function_data LPAREN func_params RPAREN vars_dec block end_function
+                    |   comments FUNC func_type ID save_function_data LPAREN RPAREN block end_function
+                    |   comments FUNC func_type ID save_function_data LPAREN func_params RPAREN block end_function'''
 
 def p_save_function_data(p):
     '''save_function_data : '''

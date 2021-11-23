@@ -97,6 +97,9 @@ def getValueFromMemoryAddress(currVarTable, operand):
             print(scope)
             print(operandType)
             print(opPosition)
+            print(quad)
+            print(len(globalVarTable['g']['int']))
+            pprint.pprint(currVarTable['p']['int'])
         exit()
 
     return result
@@ -132,7 +135,7 @@ def execute(IP, varTable):
     # Pending: Mount everything in memory
     while(IP < len(quadruples)):
         currentQuad = quadruples[IP]
-
+        
         operand0 = currentQuad[0]
         operand1 = currentQuad[1]
         operand2 = currentQuad[2]

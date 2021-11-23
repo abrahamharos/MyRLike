@@ -1,0 +1,32 @@
+Program Fibonacci;
+
+VARS
+    int i, result, number, x, ppNumber, pNumber;
+
+func int fib (int a) {
+    if (a <= 1){
+        return(a);
+    }
+    return(fib(a - 1) + fib(a - 2));
+}
+
+main(){
+    write("Prueba calculo Fibonacci");
+    write("");
+    write("Introduzca el numero:");
+    read(number);
+
+    write("Fibonacci recursivo:");
+    write(fib(number));
+
+    write("Fibonacci iterativo:");
+    result = 1;
+    pNumber = 1;
+    for x = 1 to (number - 1) do {
+        ppNumber = pNumber;
+        pNumber = result;
+        result = ppNumber + pNumber;
+    }
+
+    write(result);
+}

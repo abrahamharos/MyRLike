@@ -1,0 +1,31 @@
+Program Factorial;
+
+VARS
+    int i, result, number;
+
+func int fact (int j)
+{
+    if (j == 1) {
+        return(1);
+    }
+    return (j * fact(j - 1));
+}
+
+main(){
+    write("Prueba calculo factorial");
+    write("");
+    write("Introduzca el numero:");
+    read(number);
+
+    write("Factorial recursivo:");
+    write(fact(number));
+
+    write("Factorial iterativo:");
+    result = 1;
+    while (number >= 1) do {
+        result = result * number;
+        number = number - 1;
+    }
+
+    write(result);
+}

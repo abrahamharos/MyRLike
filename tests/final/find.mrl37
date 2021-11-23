@@ -1,0 +1,32 @@
+Program ArrayFind;
+
+VARS
+    int arreglo[10], x, n, number, result;
+
+main(){
+    n = 10;
+    write("Prueba de Find");
+    write("");
+    write("Introduzca 10 numeros:");
+    
+    for x = 0 to 10 do {
+        read(arreglo[x]);
+    }
+
+    write("");
+    write("Introduzca el numero a encontrar");
+    read(number);
+
+    result = -1;
+    for x = 0 to n do {
+        if (arreglo[x] == number) {
+            result = x;
+        }
+    }
+
+    if (result == -1) {
+        write("El numero no fue encontrado en el arreglo");
+    } else {
+        write("El numero se encuentra en la casilla", (result + 1));
+    }
+}

@@ -1,5 +1,7 @@
 import sys
 import types
+
+from numpy import array
 import MyRLike_lex
 tokens = MyRLike_lex.tokens
 from ply import yacc
@@ -144,8 +146,6 @@ def p_array_dim_stack_push(p):
     '''array_dim_stack_push : '''
     global functionDirectory, currentFunction, programName, operandStack, operatorStack, typeStack, currentVariableName, currentDim, dimensionStack
     
-    operandStack.pop()
-    typeStack.pop()
     currentDim = 0
     dimensionStack.append([currentVariableName, currentDim])
     operatorStack.append('(')
@@ -187,51 +187,49 @@ def p_array_quad_multiply(p):
 
     if not(currentVariableName in functionDirectory[currentFunction]['vars'].keys()):
         if (currentVariableName in functionDirectory[programName]['vars'].keys()):
-            mdim = functionDirectory[programName]['vars'][currentVariableName]['dim'][currentDim]['m']
+            arrayDimensions = functionDirectory[programName]['vars'][currentVariableName]['dim']
         else:
             print("Array \'" + currentVariableName + "\' does not exist")
             exit()
     else:
-        mdim = functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][currentDim]['m']
+        arrayDimensions = functionDirectory[currentFunction]['vars'][currentVariableName]['dim']
     
+    print(arrayDimensions)
+    mdim = arrayDimensions[currentDim]['m']
     if (mdim not in constantDirectory['int'].keys()):
         constantDirectory['int'][mdim] = memoryDirection.newConstVirtualDirection('int')
     mdimDirection = constantDirectory['int'][mdim]
 
+    aux = operandStack.pop()
     currentType = typeStack.pop()
-    current = operandStack.pop()
     if (currentType != 'int'):
         print('Error: Type mismatch')
         print('You can only access arrays with integer values')
         exit()
     temporal = memoryDirection.newTempVirtualDirection(currentType)
 
-    quadruple = ('*', current, mdimDirection, temporal) # Pending quadruple
+    quadruple = ('*', aux, mdimDirection, temporal) # Pending quadruple
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
     
     operandStack.append(temporal)
     typeStack.append(currentType)
 
-def p_array_quad_sum_d(p):
-    '''array_quad_sum_d :'''
 
-    global operandStack, typeStack, quadruples, quadCounter, functionDirectory, currentFunction, currentVariableName
-
-    if not(currentVariableName in functionDirectory[currentFunction]['vars'].keys()):
-        if (currentVariableName in functionDirectory[programName]['vars'].keys()):
-            dim = functionDirectory[programName]['vars'][currentVariableName]['dim']
-        else:
-            print("Array \'" + currentVariableName + "\' does not exist")
-            exit()
-    else:
-        dim = functionDirectory[currentFunction]['vars'][currentVariableName]['dim']
-    
-    if(len(dim) > 1 and currentDim > 1):
+    # If there is more than 1 dimension
+    if (len(arrayDimensions) > 1):
         aux2 = operandStack.pop()
         aux2Type = typeStack.pop()
-        aux1 = operandStack.pop()
-        aux1Type = typeStack.pop()
+        if (len(operandStack) > 0):
+            aux1 = operandStack.pop()
+            aux1Type = typeStack.pop()
+        else:
+            currentValue = 0
+            if (currentValue not in constantDirectory['int'].keys()):
+                constantDirectory['int'][currentValue] = memoryDirection.newConstVirtualDirection('int')
+            aux1 = constantDirectory['int'][currentValue]
+            aux1Type = 'int'
+
         resultType = checkValidOperators(aux1, aux1Type, aux2, aux2Type, '+')
 
         if (resultType != 'int'):
@@ -278,13 +276,14 @@ def p_array_sum_base(p):
     if (baseAddress not in constantDirectory['int'].keys()):
         constantDirectory['int'][baseAddress] = memoryDirection.newConstVirtualDirection('int')
     baseAddressDirection = constantDirectory['int'][baseAddress]
+
     tempPointer = memoryDirection.newTempPointer(arrType)
 
     quadruple = ('+', aux1, baseAddressDirection, tempPointer) # Pending quadruple
     quadruples.append(quadruple)
     quadCounter = quadCounter + 1
 
-    operandStack.append([tempPointer]) # Contains address
+    operandStack.append([tempPointer]) # Contains address 
     typeStack.append(arrType)
     
     if(operatorStack[-1] != '('):
@@ -294,8 +293,8 @@ def p_array_sum_base(p):
     dimensionStack.pop()
 
 def p_md_variable(p):
-    '''md_variable  : LBRACKET exp array_quad_verify RBRACKET array_quad_multiply array_quad_sum_d md_variable
-                    | LBRACKET exp array_quad_verify RBRACKET array_quad_sum_d array_sum_base'''
+    '''md_variable  : LBRACKET exp array_quad_verify RBRACKET array_quad_multiply md_variable
+                    | LBRACKET exp array_quad_verify RBRACKET array_sum_base'''
     pass
 
 def p_quad_save_vars(p):
@@ -887,6 +886,7 @@ def p_array_save_limit(p):
         'limit': superiorLimit
     }
     currentR = (superiorLimit) * currentR
+    currentDim = currentDim + 1
 
 def p_array_calculate_m(p):
     '''array_calculate_m : '''
@@ -899,7 +899,7 @@ def p_array_calculate_m(p):
     functionDirectory[currentFunction]['vars'][currentVariableName]['virDir'] = memoryDirection.newVirtualDirection(currentType, currentFunction, programName, arrSize)
 
     for i in range(0, len(dimensions)):
-        mdim = int(currentR / (dimensions[i + 1]['limit']))
+        mdim = int(currentR / (dimensions[i + 1]['limit'] + 1))
         functionDirectory[currentFunction]['vars'][currentVariableName]['dim'][i + 1]['m'] = mdim
         currentR = mdim
 
@@ -908,13 +908,8 @@ def p_array_calculate_m(p):
     index = typeOrder[currentType]
     functionDirectory[currentFunction]['size'][index] = functionDirectory[currentFunction]['size'][index] + arrSize
 
-def p_array_add_dimension(p):
-    '''array_add_dimension : '''
-    global currentDim
-    currentDim = currentDim + 1
-
 def p_vars_md_id(p):
-    '''vars_md_id   : LBRACKET INT array_save_limit RBRACKET array_add_dimension vars_md_id
+    '''vars_md_id   : LBRACKET INT array_save_limit RBRACKET vars_md_id
                     | LBRACKET INT array_save_limit RBRACKET array_calculate_m'''
 
 def p_array_init_dim(p):

@@ -30,6 +30,7 @@ jumpStack = []
 quadCounter = 0
 forControlStack = []
 parameterCounter = 0
+functionParameterStack = []
 calledFunction = ''
 memoryDirection = MD.virtualMemory()
 
@@ -436,12 +437,13 @@ def p_f(p):
 def p_function_parameter(p):
     '''function_parameter : '''
     
-    global operandStack, typeStack, functionDirectory, calledFunction, parameterCounter, quadCounter, quadruples
+    global operandStack, typeStack, functionDirectory, calledFunction, functionParameterStack, quadCounter, quadruples
 
     argument = operandStack.pop()
     argumentType = typeStack.pop()
 
     nParameters = len(functionDirectory[calledFunction]['parameters'])
+    parameterCounter = functionParameterStack[-1]
     if(parameterCounter >= nParameters):
         print("ERROR when calling function \'" + calledFunction + "\'\nExpected: " + str(nParameters) + " parameters")
         print("Received: " + str(parameterCounter + 1))
@@ -460,6 +462,8 @@ def p_function_parameter(p):
     quadCounter = quadCounter + 1
     
     parameterCounter = parameterCounter + 1
+    functionParameterStack.pop()
+    functionParameterStack.append(parameterCounter)
 
 def p_call_param(p):
     '''call_param   : call_param COMMA call_param
@@ -469,7 +473,7 @@ def p_call_param(p):
 def p_function_verify_ERA(p):
     '''function_verify_ERA : '''
 
-    global functionDirectory, quadruples, quadCounter, parameterCounter, calledFunction, currentFunction
+    global functionDirectory, quadruples, quadCounter, functionParameterStack, calledFunction, currentFunction
 
     # Fake bottom to solve calls before variables
     currentOperator = '{'
@@ -488,7 +492,7 @@ def p_function_verify_ERA(p):
     quadCounter = quadCounter + 1
 
     # Start parameter counter
-    parameterCounter = 0
+    functionParameterStack.append(0);
 
     calledFunctionType = functionDirectory[calledFunction]['type']
 
@@ -504,10 +508,11 @@ def p_function_verify_ERA(p):
 def p_function_end_call(p):
     '''function_end_call : '''
 
-    global functionDirectory, calledFunction, parameterCounter, quadruples, quadCounter, currentFunction, operandStack, typeStack, operatorStack
+    global functionDirectory, calledFunction, functionParameterStack, quadruples, quadCounter, currentFunction, operandStack, typeStack, operatorStack, functionParameterStack
 
     # Verify that all parameters were provided
     nParameters = len(functionDirectory[calledFunction]['parameters'])
+    parameterCounter = functionParameterStack[-1]
     if(parameterCounter < nParameters):
         print("ERROR when calling function \'" + calledFunction + "\'\nExpected: " + str(nParameters) + " parameters")
         print("Received: " + str(parameterCounter))
@@ -535,6 +540,7 @@ def p_function_end_call(p):
     currentOperator = operatorStack[-1]
     if (currentOperator == '{'):
         operatorStack.pop()
+        functionParameterStack.pop()
 
 def p_special_save_id(p):
     '''special_save_id : '''
@@ -654,7 +660,6 @@ def p_write_param(p):
                     | STRING quad_insert_string quad_generate_write'''
     pass
 
-# TODO: prevent write and read of VOID functions
 def p_quad_generate_write(p):
     '''quad_generate_write : '''
 

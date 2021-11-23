@@ -19,6 +19,7 @@ globalVarTable = {}
 memoryDirection = MD.virtualMemory()
 stackCounter = 0
 debug = True
+executionStack = []
 
 def loadData(filename):
     global functionDirectory, constantDirectory, quadruples, programName
@@ -124,7 +125,6 @@ def assignTo(memoryDirection, varTable, result):
     else:
         varTable[memoryDirection[0]][memoryDirection[1]][memoryDirection[2]] = result
         
-
 def execute(IP, varTable):
     global stackCounter
 
@@ -277,21 +277,23 @@ def execute(IP, varTable):
         if (operand0 == 'ERA'):
             # Mount function memory
             calledFunctionVarTable = mountMemory(operand3)
+            executionStack.append(calledFunctionVarTable)
             
         if (operand0 == 'PARAMETER'):
             # Assign parameter values to the current function memory
             res = getValueFromMemoryAddress(varTable, operand2)
             mem = getMemoryFromMemoryAddress(varTable, operand2)
 
+            calledFunctionVarTable = executionStack[-1]
             calledFunctionVarTable['l'][mem[1]][operand3] = res
 
         if (operand0 == 'GOSUB'):
             calledFunction = operand2
-            stackCounter = stackCounter + 1
-            if (stackCounter >= MAX_STACK):
+            if (len(executionStack) >= MAX_STACK):
                 print('Error: Stack Overflow')
                 print('Maximum # calls allowed: ' + str(MAX_STACK))
                 exit()
+            calledFunctionVarTable = executionStack[-1]
             result = execute(operand3, calledFunctionVarTable)
             
             # save returned value from the function on global var table
@@ -301,16 +303,14 @@ def execute(IP, varTable):
                     auxMemory = getMemoryFromMemoryAddress(varTable, auxNextQuad[1])
                     assignTo(auxMemory, varTable, result)
 
-                    del calledFunctionVarTable
-
         if (operand0 == 'RETURN'):
             result = getValueFromMemoryAddress(varTable, operand3)
             res = getMemoryFromMemoryAddress(varTable, operand3)
-            stackCounter = stackCounter - 1
+            executionStack.pop()
             return result
 
         if(operand0 == 'ENDFUNC'):
-            stackCounter = stackCounter - 1
+            executionStack.pop()
             return
 
         # Array's code ['verify'] and pointer access

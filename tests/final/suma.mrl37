@@ -1,0 +1,21 @@
+Program SumaAnidada;
+
+VARS
+    int i, result, n1, n2;
+
+func int suma (int i, int j)
+{
+    return (i + j);
+}
+
+main(){
+    write("Prueba calculo Suma anidada");
+    write("");
+    write("Introduzca el numero 1:");
+    read(n1);
+    write("Introduzca el numero 2:");
+    read(n2);
+
+    write("Resultado");
+    write(suma(suma(n1, n2), suma(n1, n2)));
+}

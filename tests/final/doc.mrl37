@@ -1,0 +1,23 @@
+Program documentacion;
+
+main() {
+    if (1 < 2) {
+        write("Menor que");
+    }
+    if (1 <= 2) {
+        write("Menor o igual que");
+    }
+    if (2 > 1) {
+        write("Mayor que");
+    }
+    if (2 >= 1) {
+        write("Mayor o igual que");
+    }
+    if (2 == 2) {
+        write("igual");
+    }
+    if (2 != 1) {
+        write("Diferente");
+    }
+    
+}

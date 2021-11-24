@@ -188,6 +188,13 @@ def execute(IP, varTable):
                     tempRes = 0
                 result = tempRes
                 assignTo(res, varTable, result)
+            if (operand0 == '!='):
+                if (op1 != op2):
+                    tempRes = 1
+                else:
+                    tempRes = 0
+                result = tempRes
+                assignTo(res, varTable, result)
             if (operand0 == '||'):
                 if (op1 or op2):
                     tempRes = 1
